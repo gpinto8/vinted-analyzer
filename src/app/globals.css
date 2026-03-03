@@ -11,12 +11,45 @@
   --color-text-muted: #6b7280;
   --color-border: #e5e7eb;
   --color-border-subtle: rgba(0, 119, 128, 0.08);
+  --color-upload-zone-bg: #ffffff;
+  --color-upload-zone-border: #e5e7eb;
+}
+
+.dark {
+  --color-background: #0f1419;
+  --color-card: #1a1f24;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-border-subtle: rgba(0, 119, 128, 0.2);
+  --color-upload-zone-bg: rgba(0, 119, 128, 0.12);
+  --color-upload-zone-border: rgba(0, 119, 128, 0.5);
+}
+
+html {
+  background-color: var(--color-background);
 }
 
 body {
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   background-color: var(--color-background);
   color: var(--color-text);
+}
+
+.section-card-bg {
+  background-color: #ffffff;
+}
+
+.dark .section-card-bg {
+  background-color: #0f172a;
+}
+
+.section-card-header-bg {
+  background-color: #ffffff;
+}
+
+.dark .section-card-header-bg {
+  background-color: rgba(30, 41, 59, 0.5);
 }
 
 /* Material-style form controls: reset native look */
@@ -36,18 +69,37 @@ body {
 .input-material {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid rgba(0, 119, 128, 0.25);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.875rem;
   line-height: 1.5;
+  background-color: #ffffff;
 }
 
 .input-material::placeholder {
   color: #94a3b8;
 }
 
-.input-material:hover {
+.dark .input-material {
   border-color: rgba(0, 119, 128, 0.4);
+  background-color: #1a1f24;
+}
+
+.dark .input-material::placeholder {
+  color: #64748b;
+}
+
+.dark .input-material:hover {
+  border-color: rgba(0, 119, 128, 0.5);
+}
+
+.dark .input-material:focus {
+  border-color: #007780;
+  box-shadow: 0 0 0 1px #007780;
+}
+
+.input-material:hover {
+  border-color: #d1d5db;
 }
 
 .input-material:focus {
@@ -97,10 +149,19 @@ body {
 }
 
 .upload-zone {
-  border-color: rgba(0, 119, 128, 0.5);
-  background-color: rgba(0, 119, 128, 0.06);
+  border-color: var(--color-upload-zone-border);
+  background-color: var(--color-upload-zone-bg);
 }
 
 .upload-zone:hover {
-  border-color: rgba(0, 119, 128, 0.8);
+  border-color: rgba(0, 119, 128, 0.5);
+}
+
+.dark .upload-zone {
+  border-color: rgba(0, 119, 128, 0.5);
+  background-color: rgba(0, 119, 128, 0.12);
+}
+
+.dark .upload-zone:hover {
+  border-color: rgba(0, 119, 128, 0.7);
 }

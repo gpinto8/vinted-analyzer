@@ -31,7 +31,7 @@ export function ComingSoonModal({ isOpen, onClose }: ComingSoonModalProps) {
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-sm rounded-xl border border-primary/10 bg-white p-6 shadow-xl">
+      <div className="relative w-full max-w-sm rounded-xl border border-gray-200 bg-white p-6 shadow-xl">
         <button
           type="button"
           onClick={onClose}

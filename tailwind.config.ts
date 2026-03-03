@@ -12,7 +12,7 @@ const config: Config = {
       colors: {
         primary: "#007780",
         "background-light": "#f5f8f8",
-        "background-dark": "#0f2223",
+        "background-dark": "#0f1419",
       },
       fontFamily: {
         display: ["Inter", "sans-serif"],

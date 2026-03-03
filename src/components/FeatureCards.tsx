@@ -26,7 +26,7 @@ export function FeatureCards() {
       {FEATURES.map(({ icon, title, description }) => (
         <div
           key={title}
-          className="flex items-start gap-4 rounded-xl border border-primary/5 bg-white/50 p-4"
+          className="flex items-start gap-4 rounded-xl bg-white p-4"
         >
           <span
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg p-2"
@@ -35,8 +35,8 @@ export function FeatureCards() {
             <MaterialIcon name={icon} className="text-primary leading-none" style={{ color: "#007780" }} />
           </span>
           <div>
-            <h5 className="text-sm font-bold text-slate-900">{title}</h5>
-            <p className="mt-1 text-xs text-slate-500">{description}</p>
+            <h5 className="text-sm font-bold text-black">{title}</h5>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{description}</p>
           </div>
         </div>
       ))}

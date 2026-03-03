@@ -27,6 +27,12 @@ export async function POST(request: NextRequest) {
       brand: brand ?? "",
     });
 
+    if (productType?.trim()) result.productType = productType.trim();
+    if (brand?.trim()) {
+      result.brand = brand.trim();
+      result.brandFromUser = true;
+    }
+
     return NextResponse.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

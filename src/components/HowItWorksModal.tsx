@@ -54,7 +54,7 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-primary/10 bg-white p-6 shadow-xl">
+      <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 shadow-xl">
         <button
           type="button"
           onClick={onClose}
@@ -63,7 +63,7 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
         >
           <MaterialIcon name="close" className="text-xl" />
         </button>
-        <h2 id="how-it-works-title" className="pr-8 text-xl font-bold text-slate-900">
+        <h2 id="how-it-works-title" className="pr-8 text-xl font-bold text-black">
           How it works
         </h2>
         <p className="mt-1 text-sm text-slate-500">
@@ -79,7 +79,7 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
                 <MaterialIcon name={step.icon} className="text-primary" style={{ color: "#007780" }} />
               </span>
               <div>
-                <h3 className="font-semibold text-slate-900">
+                <h3 className="font-semibold text-black">
                   {index + 1}. {step.title}
                 </h3>
                 <p className="mt-0.5 text-sm text-slate-600">{step.text}</p>
