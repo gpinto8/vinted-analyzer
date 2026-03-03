@@ -120,7 +120,7 @@ export function ListingForm({ onResult }: ListingFormProps) {
   const previewUrls = useMemo(() => {
     const currentSet = new Set(files);
     const cache = previewUrlCacheRef.current;
-    for (const [file, url] of cache.entries()) {
+    for (const [file, url] of Array.from(cache.entries())) {
       if (!currentSet.has(file)) {
         URL.revokeObjectURL(url);
         cache.delete(file);
