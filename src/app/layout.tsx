@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -25,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="it" suppressHydrationWarning>
       <head>
         {/* Dark mode - re-enable later
         <script
@@ -40,7 +41,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} min-h-screen antialiased bg-background-light text-slate-900 dark:bg-background-dark dark:text-slate-100`}>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

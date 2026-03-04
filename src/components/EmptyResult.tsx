@@ -1,8 +1,10 @@
 "use client";
 
 import { MaterialIcon } from "./MaterialIcon";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function EmptyResult() {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
       <div className="max-w-xs space-y-4">
@@ -12,9 +14,9 @@ export function EmptyResult() {
         >
           <MaterialIcon name="description" className="text-3xl leading-none text-primary" style={{ color: "#007780" }} />
         </div>
-        <h4 className="text-lg font-bold text-black">No analysis yet</h4>
+        <h4 className="text-lg font-bold text-black">{t("empty.noAnalysisYet")}</h4>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Upload photos and provide basic details to see your optimized Vinted listing here.
+          {t("empty.hint")}
         </p>
       </div>
     </div>

@@ -3,17 +3,29 @@ import type { ListingResult } from "@/types/listing";
 const GEMINI_API_BASE =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
+export type AnalyzeLocale = "it" | "en" | "es";
+
 export interface AnalyzeListingInput {
   images: string[];
   condition: string;
   productType?: string;
   brand?: string;
+  locale?: AnalyzeLocale;
 }
 
+const LOCALE_LABEL: Record<AnalyzeLocale, string> = {
+  it: "Italian",
+  en: "English",
+  es: "Spanish",
+};
+
 function buildPrompt(input: AnalyzeListingInput): string {
-  const { images, condition, productType, brand } = input;
+  const { images, condition, productType, brand, locale = "it" } = input;
+  const language = LOCALE_LABEL[locale];
   const lines = [
     `Analyze these ${images.length} clothing photos and generate listing data for a secondhand marketplace (e.g. Vinted).`,
+    "",
+    `Write the title, description, category, color, material, measurements, and tags in ${language}. Keep the same structure and keys.`,
     "",
     `SELLER-STATED CONDITION: ${condition}`,
     ...(productType ? [`Product type (hint): ${productType}`] : []),

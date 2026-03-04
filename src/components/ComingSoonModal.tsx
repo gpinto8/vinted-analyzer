@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { MaterialIcon } from "./MaterialIcon";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ComingSoonModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ComingSoonModalProps {
 }
 
 export function ComingSoonModal({ isOpen, onClose }: ComingSoonModalProps) {
+  const { t } = useLanguage();
   useEffect(() => {
     if (!isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
@@ -41,17 +43,17 @@ export function ComingSoonModal({ isOpen, onClose }: ComingSoonModalProps) {
           <MaterialIcon name="close" className="text-xl" />
         </button>
         <p id="coming-soon-title" className="text-center text-lg font-semibold text-slate-900">
-          Coming soon
+          {t("modal.comingSoon")}
         </p>
         <p className="mt-2 text-center text-sm text-slate-500">
-          This feature is under development. Check back later!
+          {t("modal.comingSoonText")}
         </p>
         <button
           type="button"
           onClick={onClose}
           className="mt-6 w-full rounded-lg bg-[#007780] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#006269]"
         >
-          OK
+          {t("modal.ok")}
         </button>
       </div>
     </div>

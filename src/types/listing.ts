@@ -26,4 +26,14 @@ export interface ListingResult {
   tags?: string[];
   priceNew?: number;
   priceSuggested?: number;
+  /** Optional sources/websites the API used or where the user can verify the listing (e.g. e-commerce links). */
+  sources?: { name: string; url: string }[];
+}
+
+/** Payload sent to the analyze API; used to re-run analysis (e.g. on locale change). */
+export interface AnalyzeRequest {
+  images: string[];
+  condition: string;
+  productType?: string;
+  brand?: string;
 }

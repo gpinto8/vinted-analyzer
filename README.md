@@ -52,6 +52,8 @@ The app uses the `/api/analyze` route to call Gemini locally. The API key is onl
 4. Click **Analyze**.
 5. The result (title, category, prices, etc.) is shown on the page.
 
+**Recovery:** The last analysis is saved in the browser. If you refresh the page or lose connection, the last result is restored automatically. If you clear the result panel, use **Recover last result** to bring it back.
+
 ## License
 
 MIT

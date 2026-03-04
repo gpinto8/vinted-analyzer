@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import { MaterialIcon } from "./MaterialIcon";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { CONDITION_OPTIONS } from "@/types/listing";
-import type { ConditionOption, ListingResult } from "@/types/listing";
+import type { AnalyzeRequest, ConditionOption, ListingResult } from "@/types/listing";
 import { resizeImage, blobToBase64 } from "@/utils/image";
+import { CameraCaptureModal } from "./CameraCaptureModal";
 
 const MAX_IMAGES = 20;
 
@@ -28,11 +31,15 @@ async function filesToBase64(files: File[]): Promise<string[]> {
   return out;
 }
 
+export type { AnalyzeRequest };
+
 export interface ListingFormProps {
-  onResult: (result: ListingResult) => void;
+  onResult: (result: ListingResult, request?: AnalyzeRequest) => void;
+  onGeneratingChange?: (isGenerating: boolean) => void;
 }
 
-export function ListingForm({ onResult }: ListingFormProps) {
+export function ListingForm({ onResult, onGeneratingChange }: ListingFormProps) {
+  const { t, locale } = useLanguage();
   const [files, setFiles] = useState<File[]>([]);
   const [condition, setCondition] = useState<ConditionOption | "">("");
   const [productType, setProductType] = useState("");
@@ -42,15 +49,32 @@ export function ListingForm({ onResult }: ListingFormProps) {
   const [dragActive, setDragActive] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [conditionOpen, setConditionOpen] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const [maxPhotosToast, setMaxPhotosToast] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const conditionDropdownRef = useRef<HTMLDivElement>(null);
+  const conditionListRef = useRef<HTMLUListElement>(null);
+  const conditionButtonRef = useRef<HTMLButtonElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+
+  useEffect(() => {
+    if (!conditionOpen || !conditionButtonRef.current) return;
+    const rect = conditionButtonRef.current.getBoundingClientRect();
+    setDropdownPosition({
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+    });
+  }, [conditionOpen]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (conditionDropdownRef.current && !conditionDropdownRef.current.contains(e.target as Node)) {
-        setConditionOpen(false);
-      }
+      const target = e.target as Node;
+      const inTrigger = conditionDropdownRef.current?.contains(target);
+      const inList = conditionListRef.current?.contains(target);
+      if (!inTrigger && !inList) setConditionOpen(false);
     }
     if (conditionOpen) {
       document.addEventListener("click", handleClickOutside);
@@ -62,33 +86,43 @@ export function ListingForm({ onResult }: ListingFormProps) {
     e.preventDefault();
     setError(null);
     if (!files.length) {
-      setError("Add at least one image.");
+      setError(t("form.addOneImage"));
       return;
     }
     if (!condition) {
-      setError("Select a condition.");
+      setError(t("form.selectConditionError"));
       return;
     }
     setLoading(true);
+    onGeneratingChange?.(true);
     try {
       const images = await filesToBase64(files);
+      const payload = {
+        images,
+        condition,
+        locale,
+        ...(productType.trim() && { productType: productType.trim() }),
+        ...(brand.trim() && { brand: brand.trim() }),
+      };
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          images,
-          condition,
-          ...(productType.trim() && { productType: productType.trim() }),
-          ...(brand.trim() && { brand: brand.trim() }),
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Request failed");
-      onResult(data as ListingResult);
+      const request: AnalyzeRequest = {
+        images,
+        condition,
+        ...(productType.trim() && { productType: productType.trim() }),
+        ...(brand.trim() && { brand: brand.trim() }),
+      };
+      onResult(data as ListingResult, request);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
+      onGeneratingChange?.(false);
     }
   };
 
@@ -96,7 +130,12 @@ export function ListingForm({ onResult }: ListingFormProps) {
     e.preventDefault();
     setDragActive(false);
     const list = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
-    setFiles((prev) => [...prev, ...list].slice(0, MAX_IMAGES));
+    setFiles((prev) => {
+      const combined = [...prev, ...list];
+      const next = combined.slice(0, MAX_IMAGES);
+      if (next.length === MAX_IMAGES && combined.length > MAX_IMAGES) setMaxPhotosToast(true);
+      return next;
+    });
   }, []);
 
   const onDragOver = useCallback((e: React.DragEvent) => {
@@ -106,12 +145,22 @@ export function ListingForm({ onResult }: ListingFormProps) {
 
   const onDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    setDragActive(false);
+    const related = e.relatedTarget as Node | null;
+    // Only clear when we know we left: relatedTarget exists and is outside drop zone.
+    // When hovering over <img>, relatedTarget is often null - stay active to avoid flashing.
+    if (related && dropZoneRef.current && !dropZoneRef.current.contains(related)) {
+      setDragActive(false);
+    }
   }, []);
 
   const onFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const list = Array.from(e.target.files ?? []);
-    setFiles((prev) => [...prev, ...list].slice(0, MAX_IMAGES));
+    setFiles((prev) => {
+      const combined = [...prev, ...list];
+      const next = combined.slice(0, MAX_IMAGES);
+      if (next.length === MAX_IMAGES && combined.length > MAX_IMAGES) setMaxPhotosToast(true);
+      return next;
+    });
     e.target.value = "";
   }, []);
 
@@ -143,9 +192,41 @@ export function ListingForm({ onResult }: ListingFormProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!maxPhotosToast) return;
+    const id = setTimeout(() => setMaxPhotosToast(false), 3000);
+    return () => clearTimeout(id);
+  }, [maxPhotosToast]);
+
   function removeFile(index: number) {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   }
+
+  function downloadFile(file: File, index: number) {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name || `image-${index + 1}.${file.type.split("/")[1] || "jpg"}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const handleTakePhotoClick = useCallback(() => {
+    const useCameraModal =
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 768px)").matches &&
+      navigator.mediaDevices?.getUserMedia;
+    if (useCameraModal) {
+      setShowCameraModal(true);
+    } else {
+      cameraInputRef.current?.click();
+    }
+  }, []);
+
+  const handleCameraCapture = useCallback((file: File) => {
+    setFiles((prev) => [...prev, file].slice(0, MAX_IMAGES));
+    setShowCameraModal(false);
+  }, []);
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -188,17 +269,17 @@ export function ListingForm({ onResult }: ListingFormProps) {
               <MaterialIcon name="add_a_photo" className="text-primary leading-none" style={{ color: "#007780", fontSize: "3rem" }} />
             </span>
             <div className="relative z-0 flex flex-col gap-1">
-              <p className="text-sm font-bold text-black">Upload up to {MAX_IMAGES} photos</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Drag & drop or use the buttons below</p>
+              <p className="whitespace-nowrap text-sm font-bold text-black">{t("form.uploadPhotos", { max: MAX_IMAGES })}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t("form.dragDrop")}</p>
             </div>
             <div className="relative z-10 mt-4 flex w-full flex-col gap-2 sm:flex-row sm:flex-initial sm:flex-wrap sm:justify-center">
               <button
                 type="button"
-                onClick={() => cameraInputRef.current?.click()}
+                onClick={handleTakePhotoClick}
                 className="flex w-full items-center justify-center gap-2 rounded-lg border-0 bg-[#007780] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#006269] focus:outline-none focus:ring-0 sm:w-auto sm:flex-1 sm:min-w-0"
               >
                 <MaterialIcon name="photo_camera" className="text-lg shrink-0" />
-                Take photo
+                {t("form.takePhoto")}
               </button>
               <button
                 type="button"
@@ -206,19 +287,37 @@ export function ListingForm({ onResult }: ListingFormProps) {
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-0 sm:w-auto sm:flex-1 sm:min-w-0"
               >
                 <MaterialIcon name="photo_library" className="text-lg shrink-0" />
-                Choose from gallery
+                {t("form.chooseFromGallery")}
               </button>
             </div>
           </div>
         ) : (
-          <div className="relative w-full">
-            <div className="flex w-full gap-3 overflow-x-auto pb-2 sm:gap-4">
+          <div
+            ref={dropZoneRef}
+            className="relative w-full"
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+          >
+            {dragActive && (
+              <div
+                className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm"
+                aria-hidden
+              >
+                <span className="rounded-lg border-2 border-dashed border-[#007780] bg-[#007780]/90 px-4 py-2.5 text-sm font-semibold text-white shadow-md">
+                  {t("form.dropImagesHere")}
+                </span>
+              </div>
+            )}
+            <div
+              className={`relative flex w-full gap-3 overflow-x-auto rounded-xl pb-2 sm:gap-4 ${dragActive ? "ring-2 ring-[#007780] ring-inset" : ""}`}
+            >
             {files.length < MAX_IMAGES && (
               <div
                 onDrop={onDrop}
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
-                className={`flex size-32 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed p-3 text-center transition-colors sm:size-36 ${
+                className={`flex size-36 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed p-3 text-center transition-colors sm:size-40 ${
                   dragActive ? "upload-zone upload-zone--active" : "upload-zone"
                 }`}
                 style={
@@ -228,14 +327,14 @@ export function ListingForm({ onResult }: ListingFormProps) {
                 }
               >
                 <MaterialIcon name="add_a_photo" className="shrink-0" style={{ color: "#007780", fontSize: "1.75rem" }} />
-                <p className="text-xs font-bold text-black sm:text-sm">Upload up to {MAX_IMAGES}</p>
-                <p className="hidden text-[10px] text-slate-500 sm:block sm:text-xs">Drag & drop</p>
+                <p className="whitespace-nowrap text-xs font-bold text-black sm:text-sm">{t("form.uploadPhotos", { max: MAX_IMAGES })}</p>
+                <p className="hidden text-[10px] text-slate-500 sm:block sm:text-xs">{t("form.dragDropShort")}</p>
                 <div className="mt-1 flex gap-1.5">
                   <button
                     type="button"
-                    onClick={() => cameraInputRef.current?.click()}
+                    onClick={handleTakePhotoClick}
                     className="flex size-8 items-center justify-center rounded-lg border-0 bg-[#007780] text-white transition-colors hover:bg-[#006269] focus:outline-none focus:ring-0 sm:size-9"
-                    aria-label="Take photo"
+                    aria-label={t("form.takePhoto")}
                   >
                     <MaterialIcon name="photo_camera" className="text-base" />
                   </button>
@@ -243,7 +342,7 @@ export function ListingForm({ onResult }: ListingFormProps) {
                     type="button"
                     onClick={() => galleryInputRef.current?.click()}
                     className="flex size-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-0 sm:size-9"
-                    aria-label="Choose from gallery"
+                    aria-label={t("form.chooseFromGallery")}
                   >
                     <MaterialIcon name="photo_library" className="text-base" />
                   </button>
@@ -253,7 +352,8 @@ export function ListingForm({ onResult }: ListingFormProps) {
             {files.map((f, i) => (
               <div
                 key={`${f.name}-${i}`}
-                className="group relative size-32 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 sm:size-36 dark:border-slate-600 dark:bg-slate-800"
+                className="group relative size-36 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 sm:size-40 dark:border-slate-600 dark:bg-slate-800"
+                onDragOver={onDragOver}
               >
                 <img
                   src={previewUrls[i]}
@@ -262,17 +362,30 @@ export function ListingForm({ onResult }: ListingFormProps) {
                   decoding="async"
                   style={{ imageRendering: "auto" }}
                 />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeFile(i);
-                  }}
-                  className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full border-0 bg-red-500 text-white shadow transition-colors hover:bg-red-600 focus:outline-none focus:ring-0 sm:size-7"
-                  aria-label={`Remove ${f.name}`}
-                >
-                  <MaterialIcon name="close" className="text-base sm:text-lg" />
-                </button>
+                <div className="absolute right-1 top-1 flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFile(i);
+                    }}
+                    className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
+                    aria-label={`Remove ${f.name}`}
+                  >
+                    <MaterialIcon name="close" className="text-[10px] sm:text-xs" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      downloadFile(f, i);
+                    }}
+                    className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
+                    aria-label={`Download ${f.name}`}
+                  >
+                    <MaterialIcon name="download" className="text-[10px] sm:text-xs" />
+                  </button>
+                </div>
               </div>
             ))}
             </div>
@@ -285,49 +398,59 @@ export function ListingForm({ onResult }: ListingFormProps) {
 
         <div className="space-y-4">
           <div className="flex flex-col gap-2" ref={conditionDropdownRef}>
-            <label className="text-sm font-medium text-black">Condition</label>
+            <label className="text-sm font-medium text-black">{t("form.condition")}</label>
             <div className="relative">
               <button
+                ref={conditionButtonRef}
                 type="button"
                 onClick={() => setConditionOpen((open) => !open)}
                 className="flex w-full items-center justify-between rounded-lg border border-slate-300 bg-white px-4 py-3 text-left text-sm text-slate-900 shadow-sm transition-colors hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-[#007780]/30 focus:ring-offset-1"
                 aria-haspopup="listbox"
                 aria-expanded={conditionOpen}
-                aria-label="Select condition"
+                aria-label={t("form.selectCondition")}
               >
                 <span className={condition ? "" : "text-slate-500"}>
-                  {condition || "Select condition"}
+                  {condition ? t(`condition.${condition}`) : t("form.selectCondition")}
                 </span>
                 <MaterialIcon
                   name={conditionOpen ? "expand_less" : "expand_more"}
                   className="text-xl text-slate-500"
                 />
               </button>
-              {conditionOpen && (
-                <ul
-                  role="listbox"
-                  className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
-                >
-                  {CONDITION_OPTIONS.map((opt) => (
-                    <li key={opt} role="option" aria-selected={condition === opt}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCondition(opt);
-                          setConditionOpen(false);
-                        }}
-                        className={`w-full px-4 py-2.5 text-left text-sm transition-colors focus:outline-none focus:ring-0 ${
-                          condition === opt
-                            ? "bg-[#007780]/10 font-medium text-[#007780]"
-                            : "text-slate-700 hover:bg-slate-100"
-                        }`}
-                      >
-                        {opt}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              {conditionOpen &&
+                typeof document !== "undefined" &&
+                createPortal(
+                  <ul
+                    ref={conditionListRef}
+                    role="listbox"
+                    className="fixed z-[100] max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                    style={{
+                      top: dropdownPosition.top,
+                      left: dropdownPosition.left,
+                      width: dropdownPosition.width,
+                    }}
+                  >
+                    {CONDITION_OPTIONS.map((opt) => (
+                      <li key={opt} role="option" aria-selected={condition === opt}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCondition(opt);
+                            setConditionOpen(false);
+                          }}
+                          className={`w-full px-4 py-2.5 text-left text-sm transition-colors focus:outline-none focus:ring-0 ${
+                            condition === opt
+                              ? "bg-[#007780]/10 font-medium text-[#007780]"
+                              : "text-slate-700 hover:bg-slate-100"
+                          }`}
+                        >
+                          {t(`condition.${opt}`)}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>,
+                  document.body
+                )}
             </div>
           </div>
 
@@ -341,18 +464,22 @@ export function ListingForm({ onResult }: ListingFormProps) {
               name={showMoreOptions ? "expand_less" : "expand_more"}
               className="text-xl"
             />
-            {showMoreOptions ? "Hide options" : "See more options"}
+            {showMoreOptions ? t("form.hideOptions") : t("form.seeMoreOptions")}
           </button>
 
           <div className={`space-y-4 ${showMoreOptions ? "block" : "hidden md:block"}`}>
               <div className="flex flex-col gap-2">
                 <label htmlFor="productType" className="text-sm font-medium text-black">
-                  Product Type <span className="font-normal text-slate-400">(Optional)</span>
+                  {t("form.productTypeOptional")}{" "}
+                  <span className="text-xs font-normal text-slate-400">{t("form.optional")}</span>
                 </label>
                 <input
                   id="productType"
                   type="text"
-                  placeholder="e.g. Oversized Hoodie"
+                  placeholder={(() => {
+                    const s = t("form.placeholderProductType");
+                    return s === "form.placeholderProductType" ? "e.g. Oversized Hoodie" : s;
+                  })()}
                   value={productType}
                   onChange={(e) => setProductType(e.target.value)}
                   className="input-material bg-white !text-black"
@@ -360,12 +487,16 @@ export function ListingForm({ onResult }: ListingFormProps) {
               </div>
               <div className="flex flex-col gap-2">
                 <label htmlFor="brand" className="text-sm font-medium text-black">
-                  Brand <span className="font-normal text-slate-400">(Optional)</span>
+                  {t("form.brandOptional")}{" "}
+                  <span className="text-xs font-normal text-slate-400">{t("form.optional")}</span>
                 </label>
                 <input
                   id="brand"
                   type="text"
-                  placeholder="e.g. Nike"
+                  placeholder={(() => {
+                    const s = t("form.placeholderBrand");
+                    return s === "form.placeholderBrand" ? "e.g. Nike" : s;
+                  })()}
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
                   className="input-material bg-white !text-black"
@@ -384,7 +515,7 @@ export function ListingForm({ onResult }: ListingFormProps) {
           <MaterialIcon name="auto_awesome" className="text-xl text-white" />
           {loading ? (
             <span className="inline-flex items-baseline">
-              Generating
+              {t("form.generating")}
               <span className="ml-0.5 inline-flex">
                 {[0, 1, 2].map((i) => (
                   <span
@@ -398,10 +529,37 @@ export function ListingForm({ onResult }: ListingFormProps) {
               </span>
             </span>
           ) : (
-            <span>Generate Listing</span>
+            <span>{t("form.generateListing")}</span>
           )}
         </button>
       </div>
+
+      <CameraCaptureModal
+        isOpen={showCameraModal}
+        onClose={() => setShowCameraModal(false)}
+        onCapture={handleCameraCapture}
+      />
+
+      {maxPhotosToast &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            role="status"
+            aria-live="polite"
+            className="fixed right-4 top-4 z-[100] flex items-start gap-2 rounded-lg border border-amber-400 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-lg dark:border-amber-500 dark:bg-amber-950/90 dark:text-amber-100 lg:top-auto lg:bottom-4"
+          >
+            <span className="flex-1 pr-1">{t("form.maxPhotosReached")}</span>
+            <button
+              type="button"
+              onClick={() => setMaxPhotosToast(false)}
+              className="shrink-0 rounded p-0.5 text-amber-700 transition-colors hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:text-amber-300 dark:hover:bg-amber-800"
+              aria-label="Close"
+            >
+              <MaterialIcon name="close" className="text-lg" />
+            </button>
+          </div>,
+          document.body
+        )}
     </form>
   );
 }

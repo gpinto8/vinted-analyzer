@@ -1,31 +1,20 @@
 "use client";
 
 import { MaterialIcon } from "./MaterialIcon";
-
-const FEATURES = [
-  {
-    icon: "search_check",
-    title: "SEO Optimized",
-    description: "Titles designed to show up first in Vinted searches.",
-  },
-  {
-    icon: "visibility",
-    title: "Visual Recognition",
-    description: "Our AI detects fabric patterns, cuts, and key details automatically.",
-  },
-  {
-    icon: "content_copy",
-    title: "Instant Copy",
-    description: "Paste directly into the Vinted app and sell 2x faster.",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function FeatureCards() {
+  const { t } = useLanguage();
+  const features = [
+    { icon: "search_check" as const, titleKey: "features.seoTitle", descKey: "features.seoDesc" },
+    { icon: "visibility" as const, titleKey: "features.visualTitle", descKey: "features.visualDesc" },
+    { icon: "content_copy" as const, titleKey: "features.copyTitle", descKey: "features.copyDesc" },
+  ];
   return (
     <>
-      {FEATURES.map(({ icon, title, description }) => (
+      {features.map(({ icon, titleKey, descKey }) => (
         <div
-          key={title}
+          key={titleKey}
           className="flex items-start gap-4 rounded-xl bg-white p-4"
         >
           <span
@@ -35,8 +24,8 @@ export function FeatureCards() {
             <MaterialIcon name={icon} className="text-primary leading-none" style={{ color: "#007780" }} />
           </span>
           <div>
-            <h5 className="text-sm font-bold text-black">{title}</h5>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{description}</p>
+            <h5 className="text-sm font-bold text-black">{t(titleKey)}</h5>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t(descKey)}</p>
           </div>
         </div>
       ))}

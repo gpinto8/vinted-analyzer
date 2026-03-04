@@ -2,36 +2,22 @@
 
 import { useEffect } from "react";
 import { MaterialIcon } from "./MaterialIcon";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HowItWorksModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const STEPS = [
-  {
-    icon: "add_a_photo",
-    title: "Upload photos",
-    text: "Add up to 20 photos of your item. Our AI analyzes them to detect style, brand, and details.",
-  },
-  {
-    icon: "edit_note",
-    title: "Set condition & details",
-    text: "Choose the item condition and optionally add product type or brand to improve the result.",
-  },
-  {
-    icon: "auto_awesome",
-    title: "Generate listing",
-    text: "Click Generate Listing. AI creates a title, description, suggested price, and tags for Vinted.",
-  },
-  {
-    icon: "content_copy",
-    title: "Copy & publish",
-    text: "Copy the suggested title and description, then paste them into the Vinted app to list your item.",
-  },
+const STEP_KEYS = [
+  { icon: "add_a_photo" as const, titleKey: "howItWorks.step1Title", textKey: "howItWorks.step1Text" },
+  { icon: "edit_note" as const, titleKey: "howItWorks.step2Title", textKey: "howItWorks.step2Text" },
+  { icon: "auto_awesome" as const, titleKey: "howItWorks.step3Title", textKey: "howItWorks.step3Text" },
+  { icon: "content_copy" as const, titleKey: "howItWorks.step4Title", textKey: "howItWorks.step4Text" },
 ];
 
 export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
+  const { t } = useLanguage();
   useEffect(() => {
     if (!isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
@@ -64,14 +50,14 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
           <MaterialIcon name="close" className="text-xl" />
         </button>
         <h2 id="how-it-works-title" className="pr-8 text-xl font-bold text-black">
-          How it works
+          {t("howItWorks.title")}
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Get optimized Vinted listings in a few steps.
+          {t("howItWorks.subtitle")}
         </p>
         <ul className="mt-6 space-y-5">
-          {STEPS.map((step, index) => (
-            <li key={step.title} className="flex gap-4">
+          {STEP_KEYS.map((step, index) => (
+            <li key={step.titleKey} className="flex gap-4">
               <span
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg leading-none"
                 style={{ backgroundColor: "rgba(0, 119, 128, 0.08)" }}
@@ -80,9 +66,9 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
               </span>
               <div>
                 <h3 className="font-semibold text-black">
-                  {index + 1}. {step.title}
+                  {index + 1}. {t(step.titleKey)}
                 </h3>
-                <p className="mt-0.5 text-sm text-slate-600">{step.text}</p>
+                <p className="mt-0.5 text-sm text-slate-600">{t(step.textKey)}</p>
               </div>
             </li>
           ))}
@@ -92,7 +78,7 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
           onClick={onClose}
           className="mt-6 w-full rounded-lg bg-[#007780] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#006269]"
         >
-          Got it
+          {t("howItWorks.gotIt")}
         </button>
       </div>
     </div>

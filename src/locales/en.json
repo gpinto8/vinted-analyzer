@@ -1,0 +1,119 @@
+{
+  "header": {
+    "howItWorks": "How it works",
+    "signIn": "Sign In",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "scrollToTop": "Scroll to top",
+    "language": "Language"
+  },
+  "languages": {
+    "it": "Italiano",
+    "en": "English",
+    "es": "Español"
+  },
+  "home": {
+    "title": "Create your listing",
+    "subtitle": "Upload your photos and our AI will generate professional, SEO-friendly titles, descriptions, and suggested prices for your Vinted listings.",
+    "inputDetails": "Input Details",
+    "optimizedResult": "Optimized Result",
+    "aiGenerated": "AI Generated",
+    "recoverLastResult": "Recover last result",
+    "updatingLanguage": "Updating…"
+  },
+  "form": {
+    "uploadPhotos": "Upload up to {max} pics",
+    "dragDrop": "Drag & drop or use the buttons below",
+    "dragDropShort": "Drag & drop",
+    "takePhoto": "Take photo",
+    "chooseFromGallery": "Choose from gallery",
+    "dropImagesHere": "Drop images here",
+    "condition": "Condition",
+    "selectCondition": "Select condition",
+    "productTypeOptional": "Product Type",
+    "brandOptional": "Brand",
+    "optional": "(optional)",
+    "generateListing": "Generate Listing",
+    "selectConditionError": "Select a condition.",
+    "addOneImage": "Add at least one image.",
+    "generating": "Generating",
+    "seeMoreOptions": "See more options",
+    "hideOptions": "Hide options",
+    "placeholderProductType": "e.g. Oversized Hoodie",
+    "placeholderBrand": "e.g. Nike",
+    "maxPhotosReached": "Maximum of 20 pics reached."
+  },
+  "condition": {
+    "New": "New",
+    "Like new": "Like new",
+    "Very good": "Very good",
+    "Good": "Good",
+    "Fair": "Fair",
+    "Used": "Used"
+  },
+  "result": {
+    "title": "Title",
+    "description": "Description",
+    "productType": "Product type",
+    "category": "Category",
+    "brand": "Brand",
+    "size": "Size",
+    "measurements": "Measurements (cm)",
+    "condition": "Condition",
+    "color": "Color",
+    "retailPrice": "Retail price",
+    "suggestedPrice": "Suggested price",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "sources": "Sources",
+    "verifyListing": "Verify listing",
+    "verifySitesHint": "Check similar items on these e-commerce sites:",
+    "findProductLinks": "Find product links (AI)",
+    "aiProductLinks": "Product links",
+    "loadingLinks": "Searching…",
+    "findProductLinksError": "Could not load links. Try again.",
+    "noAnalysisYet": "No analysis yet",
+    "emptyResultHint": "Upload photos and provide basic details to see your optimized Vinted listing here.",
+    "notClothingHint": "Image doesn't appear to be clothing or a sellable item. Try uploading photos of the item you want to list."
+  },
+  "empty": {
+    "noAnalysisYet": "No analysis yet",
+    "hint": "Upload photos and provide basic details to see your optimized Vinted listing here."
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "subtitle": "Get optimized Vinted listings in a few steps.",
+    "step1Title": "Upload photos",
+    "step1Text": "Add up to 20 photos of your item. Our AI analyzes them to detect style, brand, and details.",
+    "step2Title": "Set condition & details",
+    "step2Text": "Choose the item condition and optionally add product type or brand to improve the result.",
+    "step3Title": "Generate listing",
+    "step3Text": "Click Generate Listing. AI creates a title, description, suggested price, and tags for Vinted.",
+    "step4Title": "Copy & publish",
+    "step4Text": "Copy the suggested title and description, then paste them into the Vinted app to list your item.",
+    "gotIt": "Got it",
+    "close": "Close"
+  },
+  "features": {
+    "seoTitle": "SEO Optimized",
+    "seoDesc": "Titles designed to show up first in Vinted searches.",
+    "visualTitle": "Visual Recognition",
+    "visualDesc": "Our AI detects fabric patterns, cuts, and key details automatically.",
+    "copyTitle": "Instant Copy",
+    "copyDesc": "Paste directly into the Vinted app and sell 2x faster."
+  },
+  "footer": {
+    "loveShopping": "Love shopping?",
+    "showLove": "Show me some love on my Vinted",
+    "copyright": "Vinted Analyzer. Not affiliated with Vinted Ltd."
+  },
+  "nav": {
+    "home": "Home",
+    "profile": "Profile"
+  },
+  "modal": {
+    "comingSoon": "Coming soon",
+    "comingSoonText": "This feature is under development. Check back later!",
+    "ok": "OK"
+  }
+}

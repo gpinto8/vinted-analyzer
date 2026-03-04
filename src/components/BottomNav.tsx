@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MaterialIcon } from "./MaterialIcon";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface BottomNavProps {
   onProfileClick?: () => void;
@@ -13,6 +14,7 @@ function scrollToTop() {
 }
 
 export function BottomNav({ onProfileClick }: BottomNavProps) {
+  const { t } = useLanguage();
   const pathname = usePathname();
   const isHome = pathname === "/";
 
@@ -28,7 +30,7 @@ export function BottomNav({ onProfileClick }: BottomNavProps) {
             aria-label="Scroll to top"
           >
             <MaterialIcon name="home" className="text-2xl" style={{ color: "#007780" }} />
-            <span>Home</span>
+            <span>{t("nav.home")}</span>
           </button>
         ) : (
           <Link
@@ -37,7 +39,7 @@ export function BottomNav({ onProfileClick }: BottomNavProps) {
             style={{ color: "#007780" }}
           >
             <MaterialIcon name="home" className="text-2xl" style={{ color: "#007780" }} />
-            <span>Home</span>
+            <span>{t("nav.home")}</span>
           </Link>
         )}
         <button
@@ -46,7 +48,7 @@ export function BottomNav({ onProfileClick }: BottomNavProps) {
           className="flex flex-col items-center gap-1 rounded-md border-0 bg-transparent p-0 text-xs text-slate-500 transition-colors hover:text-slate-700 focus:outline-none focus:ring-0 dark:text-slate-400 dark:hover:text-slate-300"
         >
           <MaterialIcon name="person" className="text-2xl" />
-          <span>Profile</span>
+          <span>{t("nav.profile")}</span>
         </button>
       </div>
     </nav>
