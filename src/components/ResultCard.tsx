@@ -190,7 +190,7 @@ export function ResultCard({ data }: { data: ListingResult }) {
         </div>
       </div>
 
-      {(data.productType ?? data.category ?? data.brand ?? data.size ?? data.measurements ?? data.condition ?? data.color ?? (data.priceNew != null && data.priceNew > 0) || (data.priceSuggested != null && data.priceSuggested > 0)) && (
+      {(data.productType ?? data.category ?? data.brand ?? data.size ?? data.measurements ?? data.condition ?? data.color ?? ((data.priceNew != null && data.priceNew > 0) || (data.priceSuggested != null && data.priceSuggested > 0))) && (
         <div className="space-y-4 border-t border-gray-200 pt-4">
           {data.productType && (
             <DetailRow
