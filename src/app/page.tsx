@@ -24,6 +24,7 @@ export default function Home() {
   const [isUpdatingResultLocale, setIsUpdatingResultLocale] = useState(false);
   const [isGeneratingResult, setIsGeneratingResult] = useState(false);
   const [notClothingToast, setNotClothingToast] = useState(false);
+  const [analyzeErrorToast, setAnalyzeErrorToast] = useState(false);
   const lastRequestRef = useRef<AnalyzeRequest | null>(null);
 
   const isEmptyResult = useCallback((r: ListingResult) => {
@@ -52,6 +53,12 @@ export default function Home() {
   }, [notClothingToast]);
 
   useEffect(() => {
+    if (!analyzeErrorToast) return;
+    const id = setTimeout(() => setAnalyzeErrorToast(false), 4000);
+    return () => clearTimeout(id);
+  }, [analyzeErrorToast]);
+
+  useEffect(() => {
     if (result) {
       document.getElementById(OPTIMIZED_RESULT_ID)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -71,7 +78,10 @@ export default function Home() {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.error) return;
+        if (data.error) {
+          setAnalyzeErrorToast(true);
+          return;
+        }
         const next = data as ListingResult;
         if (!(next.title ?? "").trim() && !(next.description ?? "").trim()) {
           setNotClothingToast(true);
@@ -80,6 +90,7 @@ export default function Home() {
         setResult(next);
         saveLastResult(next, lastRequestRef.current ?? undefined);
       })
+      .catch(() => setAnalyzeErrorToast(true))
       .finally(() => setIsUpdatingResultLocale(false));
   }, [locale, result]);
 
@@ -99,26 +110,30 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid min-h-0 grid-cols-1 gap-8 lg:grid-cols-12 lg:items-stretch lg:h-[min(954px,calc(100vh-14rem))] lg:max-h-[min(954px,calc(100vh-14rem))] lg:overflow-y-auto">
-          <section className="flex min-h-0 flex-col overflow-hidden lg:col-span-6 lg:h-[min(954px,calc(100vh-14rem))]">
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-stretch">
+          <section className="flex flex-col lg:col-span-6">
+            <div className="flex flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
               <div className="shrink-0 rounded-t-xl border-b border-gray-200 bg-white p-4">
                 <h3 className="text-base font-bold tracking-tight text-black">
                   {t("home.inputDetails")}
                 </h3>
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto p-6 lg:scrollbar-thin">
-                <ListingForm onResult={handleResult} onGeneratingChange={setIsGeneratingResult} />
+              <div className="p-6">
+                <ListingForm
+                onResult={handleResult}
+                onGeneratingChange={setIsGeneratingResult}
+                onAnalyzeError={() => setAnalyzeErrorToast(true)}
+              />
               </div>
             </div>
           </section>
 
           <section
             id={OPTIMIZED_RESULT_ID}
-            className={result ? "flex min-h-0 flex-col lg:col-span-6 lg:h-[min(954px,calc(100vh-14rem))]" : "hidden lg:flex lg:min-h-0 lg:flex-col lg:col-span-6 lg:h-[min(954px,calc(100vh-14rem))]"}
+            className={result ? "flex min-h-0 flex-col lg:col-span-6" : "hidden lg:flex lg:min-h-0 lg:flex-col lg:col-span-6"}
             aria-label={t("home.optimizedResult")}
           >
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+            <div className="flex min-h-0 flex-1 flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
               <div
                 className={`shrink-0 rounded-t-xl border-b border-gray-200 bg-white p-4 ${!result || isEmptyResult(result) ? "max-md:hidden" : ""}`}
               >
@@ -143,11 +158,11 @@ export default function Home() {
                   </h3>
                 )}
               </div>
-              <div className="relative flex min-h-0 flex-1 flex-col lg:scrollbar-thin lg:overflow-y-auto">
+              <div className="relative flex min-h-0 flex-1 flex-col">
                 {result ? (
                   <>
                     <div
-                      className={`flex min-h-0 flex-1 flex-col transition-[filter] duration-200 ${
+                      className={`flex flex-col transition-[filter] duration-200 ${
                         isGeneratingResult ? "pointer-events-none select-none blur-sm" : ""
                       }`}
                     >
@@ -208,6 +223,33 @@ export default function Home() {
               type="button"
               onClick={() => setNotClothingToast(false)}
               className="shrink-0 rounded p-0.5 text-amber-700 transition-colors hover:bg-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:text-amber-300 dark:hover:bg-amber-800"
+              aria-label="Close"
+            >
+              <MaterialIcon name="close" className="text-lg" />
+            </button>
+          </div>,
+          document.body
+        )}
+      {analyzeErrorToast &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="fixed right-4 top-4 z-[100] flex max-w-sm animate-[slideInRight_0.3s_ease-out] items-start gap-3 rounded-xl bg-red-100/95 px-4 py-3.5 dark:bg-red-950/90 lg:top-auto lg:bottom-4"
+          >
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-red-200/80 dark:bg-red-900/50">
+              <MaterialIcon name="error" className="text-xl text-red-700 dark:text-red-300" />
+            </div>
+            <div className="min-w-0 flex-1 pt-0.5">
+              <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                {t("form.aiErrorFull") === "form.aiErrorFull" ? "We got an error from the AI. Please try again in a moment or check your connection." : t("form.aiErrorFull")}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAnalyzeErrorToast(false)}
+              className="shrink-0 rounded-lg p-1.5 text-red-700 transition-colors hover:bg-red-200/80 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-400 dark:text-red-300 dark:hover:bg-red-800/50 dark:hover:text-red-100"
               aria-label="Close"
             >
               <MaterialIcon name="close" className="text-lg" />

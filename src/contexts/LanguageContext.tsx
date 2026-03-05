@@ -11,7 +11,7 @@ import {
 
 const LOCALE_KEY = "vinted-analyzer-locale";
 
-export type Locale = "it" | "en" | "es";
+export type Locale = "it" | "en" | "es" | "fr";
 
 type Translations = Record<string, unknown>;
 
@@ -19,12 +19,15 @@ const localeModules: Record<Locale, () => Promise<{ default: Translations }>> = 
   it: () => import("@/locales/it.json").then((m) => ({ default: m as unknown as Translations })),
   en: () => import("@/locales/en.json").then((m) => ({ default: m as unknown as Translations })),
   es: () => import("@/locales/es.json").then((m) => ({ default: m as unknown as Translations })),
+  fr: () => import("@/locales/fr.json").then((m) => ({ default: m as unknown as Translations })),
 };
+
+const VALID_LOCALES = new Set<Locale>(["it", "en", "es", "fr"]);
 
 function getStoredLocale(): Locale {
   if (typeof window === "undefined") return "it";
   const stored = localStorage.getItem(LOCALE_KEY) as Locale | null;
-  return stored === "it" || stored === "en" || stored === "es" ? stored : "it";
+  return stored && VALID_LOCALES.has(stored) ? stored : "it";
 }
 
 function getNested(obj: unknown, path: string): string | undefined {
@@ -75,7 +78,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLocaleState(newLocale);
     if (typeof window !== "undefined") {
       localStorage.setItem(LOCALE_KEY, newLocale);
-      document.documentElement.lang = newLocale === "it" ? "it" : newLocale === "es" ? "es" : "en";
+      document.documentElement.lang = newLocale;
     }
   }, []);
 
@@ -93,7 +96,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    document.documentElement.lang = locale === "it" ? "it" : locale === "es" ? "es" : "en";
+    document.documentElement.lang = locale;
   }, [locale]);
 
   return (

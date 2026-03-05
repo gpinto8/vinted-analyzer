@@ -10,7 +10,8 @@
   "languages": {
     "it": "Italiano",
     "en": "English",
-    "es": "Español"
+    "es": "Español",
+    "fr": "French"
   },
   "home": {
     "title": "Create your listing",
@@ -41,7 +42,10 @@
     "hideOptions": "Hide options",
     "placeholderProductType": "e.g. Oversized Hoodie",
     "placeholderBrand": "e.g. Nike",
-    "maxPhotosReached": "Maximum of 20 pics reached."
+    "maxPhotosReached": "Maximum of 20 pics reached.",
+    "aiError": "We got an error from the AI.",
+    "aiErrorHint": "Please try again in a moment or check your connection.",
+    "aiErrorFull": "We got an error from the AI. Please try again in a moment or check your connection."
   },
   "condition": {
     "New": "New",

@@ -18,15 +18,16 @@ export async function POST(request: NextRequest) {
       condition?: string;
       productType?: string;
       brand?: string;
-      locale?: "it" | "en" | "es";
+      locale?: "it" | "en" | "es" | "fr";
     };
 
+    const validLocales = new Set(["it", "en", "es", "fr"] as const);
     const result = await analyzeListingWithGemini(GEMINI_API_KEY, {
       images: images ?? [],
       condition: condition ?? "",
       productType: productType ?? "",
       brand: brand ?? "",
-      locale: locale === "it" || locale === "es" ? locale : "it",
+      locale: locale && validLocales.has(locale) ? locale : "it",
     });
 
     return NextResponse.json(result);

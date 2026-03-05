@@ -3,7 +3,7 @@ import type { ListingResult } from "@/types/listing";
 const GEMINI_API_BASE =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
-export type AnalyzeLocale = "it" | "en" | "es";
+export type AnalyzeLocale = "it" | "en" | "es" | "fr";
 
 export interface AnalyzeListingInput {
   images: string[];
@@ -17,6 +17,7 @@ const LOCALE_LABEL: Record<AnalyzeLocale, string> = {
   it: "Italian",
   en: "English",
   es: "Spanish",
+  fr: "French",
 };
 
 function buildPrompt(input: AnalyzeListingInput): string {

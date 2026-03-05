@@ -1,0 +1,123 @@
+{
+  "header": {
+    "howItWorks": "Comment ça marche",
+    "signIn": "Se connecter",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "scrollToTop": "Haut de page",
+    "language": "Langue"
+  },
+  "languages": {
+    "it": "Italien",
+    "en": "Anglais",
+    "es": "Espagnol",
+    "fr": "Français"
+  },
+  "home": {
+    "title": "Créez votre annonce",
+    "subtitle": "Téléchargez vos photos et notre IA génère des titres, descriptions et prix suggérés professionnels et optimisés pour vos annonces Vinted.",
+    "inputDetails": "Détails saisis",
+    "optimizedResult": "Résultat optimisé",
+    "aiGenerated": "Généré par l'IA",
+    "recoverLastResult": "Récupérer le dernier résultat",
+    "updatingLanguage": "Mise à jour…"
+  },
+  "form": {
+    "uploadPhotos": "Téléchargez jusqu'à {max} photos",
+    "dragDrop": "Glissez-déposez ou utilisez les boutons ci-dessous",
+    "dragDropShort": "Glissez-déposez",
+    "takePhoto": "Prendre une photo",
+    "chooseFromGallery": "Choisir dans la galerie",
+    "dropImagesHere": "Déposez les images ici",
+    "condition": "État",
+    "selectCondition": "Sélectionner l'état",
+    "productTypeOptional": "Type de produit",
+    "brandOptional": "Marque",
+    "optional": "(facultatif)",
+    "generateListing": "Générer l'annonce",
+    "selectConditionError": "Sélectionnez un état.",
+    "addOneImage": "Ajoutez au moins une image.",
+    "generating": "Génération en cours",
+    "seeMoreOptions": "Voir plus d'options",
+    "hideOptions": "Masquer les options",
+    "placeholderProductType": "ex. Sweat oversize",
+    "placeholderBrand": "ex. Nike",
+    "maxPhotosReached": "Maximum de 20 photos atteint.",
+    "aiError": "Une erreur est survenue côté IA.",
+    "aiErrorHint": "Réessayez dans un instant ou vérifiez votre connexion.",
+    "aiErrorFull": "Une erreur est survenue côté IA. Réessayez dans un instant ou vérifiez votre connexion."
+  },
+  "condition": {
+    "New": "Neuf",
+    "Like new": "Comme neuf",
+    "Very good": "Très bon état",
+    "Good": "Bon état",
+    "Fair": "Correct",
+    "Used": "Usé"
+  },
+  "result": {
+    "title": "Titre",
+    "description": "Description",
+    "productType": "Type de produit",
+    "category": "Catégorie",
+    "brand": "Marque",
+    "size": "Taille",
+    "measurements": "Mensurations (cm)",
+    "condition": "État",
+    "color": "Couleur",
+    "retailPrice": "Prix neuf",
+    "suggestedPrice": "Prix suggéré",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "sources": "Sources",
+    "verifyListing": "Vérifier l'annonce",
+    "verifySitesHint": "Consultez des articles similaires sur ces sites :",
+    "findProductLinks": "Trouver des liens (IA)",
+    "aiProductLinks": "Liens produit",
+    "loadingLinks": "Recherche…",
+    "findProductLinksError": "Impossible de charger les liens. Réessayez.",
+    "noAnalysisYet": "Pas encore d'analyse",
+    "emptyResultHint": "Téléchargez des photos et renseignez les détails pour voir votre annonce Vinted optimisée ici.",
+    "notClothingHint": "L'image ne semble pas être un vêtement ou un article vendable. Essayez de télécharger des photos de l'article que vous souhaitez mettre en vente."
+  },
+  "empty": {
+    "noAnalysisYet": "Pas encore d'analyse",
+    "hint": "Téléchargez des photos et renseignez les détails pour voir votre annonce Vinted optimisée ici."
+  },
+  "howItWorks": {
+    "title": "Comment ça marche",
+    "subtitle": "Obtenez des annonces Vinted optimisées en quelques étapes.",
+    "step1Title": "Téléchargez des photos",
+    "step1Text": "Ajoutez jusqu'à 20 photos de votre article. Notre IA les analyse pour détecter le style, la marque et les détails.",
+    "step2Title": "Indiquez l'état et les détails",
+    "step2Text": "Choisissez l'état de l'article et ajoutez éventuellement le type de produit ou la marque pour améliorer le résultat.",
+    "step3Title": "Générez l'annonce",
+    "step3Text": "Cliquez sur Générer l'annonce. L'IA crée un titre, une description, un prix suggéré et des tags pour Vinted.",
+    "step4Title": "Copiez et publiez",
+    "step4Text": "Copiez le titre et la description suggérés, puis collez-les dans l'application Vinted pour publier votre article.",
+    "gotIt": "Compris",
+    "close": "Fermer"
+  },
+  "features": {
+    "seoTitle": "Optimisé SEO",
+    "seoDesc": "Des titres conçus pour apparaître en premier dans les recherches Vinted.",
+    "visualTitle": "Reconnaissance visuelle",
+    "visualDesc": "Notre IA détecte automatiquement les tissus, coupes et détails clés.",
+    "copyTitle": "Copie instantanée",
+    "copyDesc": "Collez directement dans l'application Vinted et vendez 2 fois plus vite."
+  },
+  "footer": {
+    "loveShopping": "Vous aimez faire du shopping ?",
+    "showLove": "Soutenez-moi sur mon Vinted",
+    "copyright": "Vinted Analyzer. Non affilié à Vinted Ltd."
+  },
+  "nav": {
+    "home": "Accueil",
+    "profile": "Profil"
+  },
+  "modal": {
+    "comingSoon": "Bientôt disponible",
+    "comingSoonText": "Cette fonctionnalité est en cours de développement. Revenez bientôt !",
+    "ok": "OK"
+  }
+}

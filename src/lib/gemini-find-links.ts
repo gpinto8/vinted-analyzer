@@ -3,7 +3,7 @@ export interface ProductLink {
   url: string;
 }
 
-export type FindProductLocale = "it" | "en" | "es";
+export type FindProductLocale = "it" | "en" | "es" | "fr";
 
 export interface FindProductLinksInput {
   title: string;
@@ -62,6 +62,7 @@ const LOCALE_HINT: Record<FindProductLocale, string> = {
   it: "Prefer Italian or .it e-commerce sites (e.g. zalando.it, bershka.com/it). Search in Italian.",
   en: "Prefer UK/International or .co.uk/.com e-commerce sites. Search in English.",
   es: "Prefer Spanish or .es e-commerce sites (e.g. zalando.es). Search in Spanish.",
+  fr: "Prefer French or .fr e-commerce sites (e.g. zalando.fr, bershka.com/fr). Search in French.",
 };
 
 export async function findProductLinksWithGemini(

@@ -17,14 +17,15 @@ export async function POST(request: NextRequest) {
       title?: string;
       brand?: string;
       productType?: string;
-      locale?: "it" | "en" | "es";
+      locale?: "it" | "en" | "es" | "fr";
     };
 
+    const validLocales = new Set(["it", "en", "es", "fr"] as const);
     const links = await findProductLinksWithGemini(GEMINI_API_KEY, {
       title: title ?? "",
       brand: brand ?? "",
       productType: productType ?? "",
-      locale: locale === "it" || locale === "es" ? locale : "it",
+      locale: locale && validLocales.has(locale) ? locale : "it",
     });
 
     return NextResponse.json(links);

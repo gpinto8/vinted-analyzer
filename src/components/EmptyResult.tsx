@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export function EmptyResult() {
   const { t } = useLanguage();
   return (
-    <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-8 text-center">
       <div className="max-w-xs space-y-4">
         <div
           className="mx-auto flex h-16 w-16 shrink-0 items-center justify-center rounded-full"

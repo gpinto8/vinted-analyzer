@@ -1,15 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { EmptyResult } from "./EmptyResult";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getVerifyLinks } from "@/lib/verify-links";
 import type { ListingResult } from "@/types/listing";
-
-interface ProductLink {
-  name: string;
-  url: string;
-}
 
 async function copyToClipboard(text: string): Promise<boolean> {
   try {
@@ -64,9 +60,7 @@ function DetailRow({
 
 export function ResultCard({ data }: { data: ListingResult }) {
   const { t, locale } = useLanguage();
-  const [aiLinks, setAiLinks] = useState<ProductLink[]>([]);
-  const [loadingLinks, setLoadingLinks] = useState(false);
-  const [errorLinks, setErrorLinks] = useState<string | null>(null);
+  const verifyLinks = useMemo(() => getVerifyLinks(data, locale), [data, locale]);
   const [copiedTitle, setCopiedTitle] = useState(false);
   const [copiedDesc, setCopiedDesc] = useState(false);
   const [copiedCategory, setCopiedCategory] = useState(false);
@@ -105,42 +99,6 @@ export function ResultCard({ data }: { data: ListingResult }) {
     data.priceSuggested != null && data.priceSuggested > 0 ? `€ ${data.priceSuggested}` : "",
     setCopiedPrice
   );
-
-  const fetchProductLinks = useCallback(async () => {
-    setErrorLinks(null);
-    setLoadingLinks(true);
-    try {
-      const res = await fetch("/api/find-product-links", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: data.title ?? "",
-          brand: data.brand ?? "",
-          productType: data.productType ?? "",
-          locale,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        setAiLinks([]);
-        setErrorLinks(json?.error ?? t("result.findProductLinksError"));
-        return;
-      }
-      setAiLinks(Array.isArray(json) ? json : []);
-    } catch {
-      setAiLinks([]);
-      setErrorLinks(t("result.findProductLinksError"));
-    } finally {
-      setLoadingLinks(false);
-    }
-  }, [data.title, data.brand, data.productType, locale, t]);
-
-  useEffect(() => {
-    const title = (data.title ?? "").trim();
-    const desc = (data.description ?? "").trim();
-    if (!title && !desc) return;
-    fetchProductLinks();
-  }, [fetchProductLinks]);
 
   const title = data.title ?? "";
   const description = data.description ?? "";
@@ -291,37 +249,25 @@ export function ResultCard({ data }: { data: ListingResult }) {
         </div>
       )}
 
-      {!isEmptyResult && (
+      {!isEmptyResult && verifyLinks.length > 0 && (
         <div className="space-y-2 border-t border-gray-200 pt-4">
           <h4 className="text-sm font-bold text-black">{t("result.verifyListing")}</h4>
-          {loadingLinks && (
-            <div className="flex items-center gap-2 py-2 text-sm text-slate-600">
-              <MaterialIcon name="progress_activity" className="animate-spin text-lg text-[#007780]" />
-              {t("result.loadingLinks")}
-            </div>
-          )}
-          {errorLinks && !loadingLinks && (
-            <p className="text-xs text-red-600" role="alert">
-              {errorLinks}
-            </p>
-          )}
-          {aiLinks.length > 0 && !loadingLinks && (
-            <ul className="flex flex-wrap gap-2">
-              {aiLinks.map((link) => (
-                <li key={`${link.name}-${link.url}`}>
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-lg border border-[#007780] bg-[#007780]/5 px-3 py-2 text-sm font-medium text-[#007780] transition-colors hover:bg-[#007780]/15"
-                  >
-                    {link.name}
-                    <MaterialIcon name="open_in_new" className="text-sm" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
+          <p className="text-xs text-slate-600 dark:text-slate-400">{t("result.verifySitesHint")}</p>
+          <ul className="flex flex-wrap gap-2">
+            {verifyLinks.map((link) => (
+              <li key={`${link.name}-${link.url}`}>
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-lg border border-[#007780] bg-[#007780]/5 px-3 py-2 text-sm font-medium text-[#007780] transition-colors hover:bg-[#007780]/15"
+                >
+                  {link.name}
+                  <MaterialIcon name="open_in_new" className="text-sm" />
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

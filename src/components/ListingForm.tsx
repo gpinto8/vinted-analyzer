@@ -36,9 +36,10 @@ export type { AnalyzeRequest };
 export interface ListingFormProps {
   onResult: (result: ListingResult, request?: AnalyzeRequest) => void;
   onGeneratingChange?: (isGenerating: boolean) => void;
+  onAnalyzeError?: () => void;
 }
 
-export function ListingForm({ onResult, onGeneratingChange }: ListingFormProps) {
+export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: ListingFormProps) {
   const { t, locale } = useLanguage();
   const [files, setFiles] = useState<File[]>([]);
   const [condition, setCondition] = useState<ConditionOption | "">("");
@@ -110,7 +111,11 @@ export function ListingForm({ onResult, onGeneratingChange }: ListingFormProps) 
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Request failed");
+      if (!res.ok) {
+        onAnalyzeError?.();
+        setError(null);
+        return;
+      }
       const request: AnalyzeRequest = {
         images,
         condition,
@@ -118,8 +123,9 @@ export function ListingForm({ onResult, onGeneratingChange }: ListingFormProps) 
         ...(brand.trim() && { brand: brand.trim() }),
       };
       onResult(data as ListingResult, request);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } catch {
+      onAnalyzeError?.();
+      setError(null);
     } finally {
       setLoading(false);
       onGeneratingChange?.(false);
@@ -372,7 +378,7 @@ export function ListingForm({ onResult, onGeneratingChange }: ListingFormProps) 
                     className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
                     aria-label={`Remove ${f.name}`}
                   >
-                    <MaterialIcon name="close" className="text-[10px] sm:text-xs" />
+                    <MaterialIcon name="close" className="text-[4px] sm:text-[5px]" />
                   </button>
                   <button
                     type="button"
@@ -383,7 +389,7 @@ export function ListingForm({ onResult, onGeneratingChange }: ListingFormProps) 
                     className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
                     aria-label={`Download ${f.name}`}
                   >
-                    <MaterialIcon name="download" className="text-[10px] sm:text-xs" />
+                    <MaterialIcon name="download" className="text-[4px] sm:text-[5px]" />
                   </button>
                 </div>
               </div>
@@ -404,7 +410,11 @@ export function ListingForm({ onResult, onGeneratingChange }: ListingFormProps) 
                 ref={conditionButtonRef}
                 type="button"
                 onClick={() => setConditionOpen((open) => !open)}
-                className="flex w-full items-center justify-between rounded-lg border border-slate-300 bg-white px-4 py-3 text-left text-sm text-slate-900 shadow-sm transition-colors hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-[#007780]/30 focus:ring-offset-1"
+                className={`flex w-full items-center justify-between rounded-lg border bg-white px-4 py-3 text-left text-sm text-slate-900 shadow-sm transition-colors focus:outline-none focus:ring-0 ${
+                  conditionOpen
+                    ? "border-2 border-[#007780] px-[15px] py-[11px] shadow-[0_0_0_1px_#007780]"
+                    : "border border-slate-300 hover:border-slate-400"
+                }`}
                 aria-haspopup="listbox"
                 aria-expanded={conditionOpen}
                 aria-label={t("form.selectCondition")}
@@ -506,7 +516,6 @@ export function ListingForm({ onResult, onGeneratingChange }: ListingFormProps) 
           </div>
 
         {error && <p className="text-sm font-normal text-red-600">{error}</p>}
-
         <button
           type="submit"
           disabled={loading}

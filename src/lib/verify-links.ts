@@ -22,6 +22,7 @@ const LOCALE_SUFFIX: Record<Locale, { zalando: string; aboutYou: string; hm: str
   it: { zalando: "it", aboutYou: "it", hm: "it_it", zara: "it/it" },
   en: { zalando: "co.uk", aboutYou: "com", hm: "en_gb", zara: "com/en" },
   es: { zalando: "es", aboutYou: "es", hm: "es_es", zara: "es/es" },
+  fr: { zalando: "fr", aboutYou: "fr", hm: "fr_fr", zara: "fr/fr" },
 };
 
 function getRetailerSearchUrls(query: string, locale: Locale): VerifyLink[] {
@@ -56,16 +57,16 @@ const OFFICIAL_BRAND_SITES: Record<
   string,
   { name: string; getSearchUrl: (query: string, locale: Locale) => string }
 > = {
-  bershka: { name: "Bershka", getSearchUrl: (q, loc) => `https://www.bershka.com/${loc === "it" ? "it" : loc === "es" ? "es" : "com"}/search?q=${encodeQuery(q)}` },
+  bershka: { name: "Bershka", getSearchUrl: (q, loc) => `https://www.bershka.com/${loc === "it" ? "it" : loc === "es" ? "es" : loc === "fr" ? "fr" : "com"}/search?q=${encodeQuery(q)}` },
   zara: { name: "Zara", getSearchUrl: (q, loc) => `https://www.zara.com/${LOCALE_SUFFIX[loc].zara}/search?q=${encodeQuery(q)}` },
-  "pull&bear": { name: "Pull&Bear", getSearchUrl: (q, loc) => `https://www.pullandbear.com/${loc === "it" ? "it" : loc === "es" ? "es" : "com"}/search?q=${encodeQuery(q)}` },
-  "massimo dutti": { name: "Massimo Dutti", getSearchUrl: (q, loc) => `https://www.massimodutti.com/${loc === "it" ? "it" : loc === "es" ? "es" : "com"}/search?q=${encodeQuery(q)}` },
+  "pull&bear": { name: "Pull&Bear", getSearchUrl: (q, loc) => `https://www.pullandbear.com/${loc === "it" ? "it" : loc === "es" ? "es" : loc === "fr" ? "fr" : "com"}/search?q=${encodeQuery(q)}` },
+  "massimo dutti": { name: "Massimo Dutti", getSearchUrl: (q, loc) => `https://www.massimodutti.com/${loc === "it" ? "it" : loc === "es" ? "es" : loc === "fr" ? "fr" : "com"}/search?q=${encodeQuery(q)}` },
   "h&m": { name: "H&M", getSearchUrl: (q, loc) => `https://www2.hm.com/${LOCALE_SUFFIX[loc].hm}/search-results.html?q=${encodeQuery(q)}` },
   hm: { name: "H&M", getSearchUrl: (q, loc) => `https://www2.hm.com/${LOCALE_SUFFIX[loc].hm}/search-results.html?q=${encodeQuery(q)}` },
-  mango: { name: "Mango", getSearchUrl: (q, loc) => `https://shop.mango.com/${loc === "it" ? "it" : loc === "es" ? "es" : "gb"}/search?q=${encodeQuery(q)}` },
+  mango: { name: "Mango", getSearchUrl: (q, loc) => `https://shop.mango.com/${loc === "it" ? "it" : loc === "es" ? "es" : loc === "fr" ? "fr" : "gb"}/search?q=${encodeQuery(q)}` },
   uniqlo: { name: "Uniqlo", getSearchUrl: (q) => `https://www.uniqlo.com/eu/en/search/?q=${encodeQuery(q)}` },
-  nike: { name: "Nike", getSearchUrl: (q, loc) => `https://www.nike.com/${loc === "it" ? "it" : loc === "es" ? "es" : "gb"}/w?q=${encodeQuery(q)}` },
-  adidas: { name: "Adidas", getSearchUrl: (q, loc) => `https://www.adidas.${loc === "it" ? "it" : loc === "es" ? "es" : "com"}/search?q=${encodeQuery(q)}` },
+  nike: { name: "Nike", getSearchUrl: (q, loc) => `https://www.nike.com/${loc === "it" ? "it" : loc === "es" ? "es" : loc === "fr" ? "fr" : "gb"}/w?q=${encodeQuery(q)}` },
+  adidas: { name: "Adidas", getSearchUrl: (q, loc) => `https://www.adidas.${loc === "it" ? "it" : loc === "es" ? "es" : loc === "fr" ? "fr" : "com"}/search?q=${encodeQuery(q)}` },
 };
 
 function normalizeBrand(brand: string): string {

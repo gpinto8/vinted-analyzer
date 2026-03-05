@@ -39,6 +39,7 @@ const LOCALES: { value: Locale; labelKey: string }[] = [
   { value: "it", labelKey: "languages.it" },
   { value: "en", labelKey: "languages.en" },
   { value: "es", labelKey: "languages.es" },
+  { value: "fr", labelKey: "languages.fr" },
 ];
 
 export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
@@ -190,7 +191,7 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
             }}
           />
           <nav
-            className="absolute right-0 z-50 flex flex-row justify-between gap-4 bg-white px-4 py-3 shadow-[0_4px_12px_rgba(0,0,0,0.08)] md:hidden"
+            className="absolute left-0 right-0 z-50 flex w-full flex-row items-start justify-between gap-4 bg-white px-4 py-3 md:hidden"
             role="dialog"
             aria-label="Mobile menu"
           >
