@@ -294,10 +294,6 @@ export function ResultCard({ data }: { data: ListingResult }) {
           </ul>
         </div>
       )}
-      <div
-        className="pointer-events-none absolute bottom-0 left-0 right-0 hidden h-16 bg-gradient-to-t from-white to-transparent dark:from-slate-900 lg:block"
-        aria-hidden
-      />
     </div>
   );
 }

@@ -74,7 +74,19 @@ export async function findProductLinksWithGemini(
   if (!query.trim()) return [];
 
   const localeHint = LOCALE_HINT[locale];
-  const prompt = `Find 4-6 real product detail page (PDP) URLs or official product search URLs where a customer can buy this clothing item or a very similar one. Product: "${query}". ${localeHint} Return only valid https URLs. List each URL on a new line, nothing else.`;
+  const prompt = [
+    "Find 4-8 real product page URLs where someone can buy this clothing item or a very similar one.",
+    "",
+    `Product: ${title}`,
+    `Brand: ${brand || "Unknown"}`,
+    `Type: ${productType || "Clothing"}`,
+    "",
+    `${localeHint}`,
+    "",
+    "Return URLs from: the brand's official site, Zalando, ASOS, H&M, Zara, About You, Bershka, Mango, Amazon, eBay, or other fashion retailers.",
+    "Any country/language domain is fine. Only real, working product or search pages.",
+    "One URL per line, no numbering or explanation.",
+  ].join("\n");
 
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
