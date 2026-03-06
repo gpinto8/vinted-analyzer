@@ -33,19 +33,19 @@ export function ComingSoonModal({ isOpen, onClose }: ComingSoonModalProps) {
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-sm rounded-xl border border-gray-200 bg-white p-6 shadow-xl">
+      <div className="relative w-full max-w-sm rounded-xl border border-gray-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900">
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          className="absolute right-3 top-3 rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
           aria-label="Close"
         >
           <MaterialIcon name="close" className="text-xl" />
         </button>
-        <p id="coming-soon-title" className="text-center text-lg font-semibold text-slate-900">
+        <p id="coming-soon-title" className="text-center text-lg font-semibold text-slate-900 dark:text-slate-100">
           {t("modal.comingSoon")}
         </p>
-        <p className="mt-2 text-center text-sm text-slate-500">
+        <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
           {t("modal.comingSoonText")}
         </p>
         <button

@@ -41,6 +41,37 @@ html {
   background-color: var(--color-background);
 }
 
+/* Main app scrollbar: same thin style as in-panel scrollbars */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+html::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+html::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark html {
+  scrollbar-color: #475569 transparent;
+}
+.dark html::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+.dark html::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 @media (max-width: 1023px) {
   html {
     scrollbar-width: none;
@@ -192,6 +223,7 @@ body {
 }
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
@@ -202,4 +234,19 @@ body {
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+.dark .scrollbar-thin {
+  scrollbar-color: #475569 transparent;
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+.dark .select-material option {
+  background: #1a1f24;
+  color: #e2e8f0;
 }

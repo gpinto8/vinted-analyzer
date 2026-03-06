@@ -40,19 +40,19 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
         className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 shadow-xl">
+      <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900">
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+          className="absolute right-3 top-3 rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
           aria-label="Close"
         >
           <MaterialIcon name="close" className="text-xl" />
         </button>
-        <h2 id="how-it-works-title" className="pr-8 text-xl font-bold text-black">
+        <h2 id="how-it-works-title" className="pr-8 text-xl font-bold text-black dark:text-slate-100">
           {t("howItWorks.title")}
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           {t("howItWorks.subtitle")}
         </p>
         <ul className="mt-6 space-y-5">
@@ -65,10 +65,10 @@ export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
                 <MaterialIcon name={step.icon} className="text-primary" style={{ color: "#007780" }} />
               </span>
               <div>
-                <h3 className="font-semibold text-black">
+                <h3 className="font-semibold text-black dark:text-slate-100">
                   {index + 1}. {t(step.titleKey)}
                 </h3>
-                <p className="mt-0.5 text-sm text-slate-600">{t(step.textKey)}</p>
+                <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">{t(step.textKey)}</p>
               </div>
             </li>
           ))}

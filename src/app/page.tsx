@@ -11,7 +11,7 @@ import { ComingSoonModal } from "@/components/ComingSoonModal";
 import { HowItWorksModal } from "@/components/HowItWorksModal";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { saveLastResult } from "@/lib/listing-storage";
+import { getLastResult, saveLastResult } from "@/lib/listing-storage";
 import type { ListingResult } from "@/types/listing";
 
 const OPTIMIZED_RESULT_ID = "optimized-result";
@@ -19,6 +19,8 @@ const OPTIMIZED_RESULT_ID = "optimized-result";
 export default function Home() {
   const { t, locale } = useLanguage();
   const [result, setResult] = useState<ListingResult | null>(null);
+  const [draftProductType, setDraftProductType] = useState("");
+  const [draftBrand, setDraftBrand] = useState("");
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [isUpdatingResultLocale, setIsUpdatingResultLocale] = useState(false);
@@ -42,19 +44,21 @@ export default function Home() {
       setResult(newResult);
       saveLastResult(newResult, request);
       if (request) lastRequestRef.current = request;
+      if (request?.productType) setDraftProductType(request.productType);
+      if (request?.brand) setDraftBrand(request.brand);
     },
     [isEmptyResult]
   );
 
   useEffect(() => {
     if (!notClothingToast) return;
-    const id = setTimeout(() => setNotClothingToast(false), 4000);
+    const id = setTimeout(() => setNotClothingToast(false), 6000);
     return () => clearTimeout(id);
   }, [notClothingToast]);
 
   useEffect(() => {
     if (!analyzeErrorToast) return;
-    const id = setTimeout(() => setAnalyzeErrorToast(false), 4000);
+    const id = setTimeout(() => setAnalyzeErrorToast(false), 6000);
     return () => clearTimeout(id);
   }, [analyzeErrorToast]);
 
@@ -68,31 +72,51 @@ export default function Home() {
   useEffect(() => {
     if (prevLocaleRef.current === locale) return;
     prevLocaleRef.current = locale;
-    const request = lastRequestRef.current;
-    if (!request || !result) return;
+    if (!result) return;
+    const request = lastRequestRef.current ?? getLastResult()?.request;
     setIsUpdatingResultLocale(true);
-    fetch("/api/analyze", {
+
+    fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...request, locale }),
+      body: JSON.stringify({
+        result,
+        targetLocale: locale,
+        requestTexts: {
+          ...(draftProductType.trim() && { productType: draftProductType.trim() }),
+          ...(draftBrand.trim() && { brand: draftBrand.trim() }),
+        },
+      }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(res.statusText);
+        return res.json() as Promise<{ result: ListingResult; requestTexts?: { productType?: string; brand?: string } }>;
+      })
       .then((data) => {
-        if (data.error) {
-          setAnalyzeErrorToast(true);
-          return;
+        setResult(data.result);
+        const translatedProductType = data.requestTexts?.productType;
+        const translatedBrand = data.requestTexts?.brand;
+        if (typeof translatedProductType === "string") {
+          setDraftProductType(translatedProductType);
         }
-        const next = data as ListingResult;
-        if (!(next.title ?? "").trim() && !(next.description ?? "").trim()) {
-          setNotClothingToast(true);
-          return;
+        if (typeof translatedBrand === "string") {
+          setDraftBrand(translatedBrand);
         }
-        setResult(next);
-        saveLastResult(next, lastRequestRef.current ?? undefined);
+        if (request) {
+          const nextRequest: AnalyzeRequest = {
+            ...request,
+            ...(typeof translatedProductType === "string" ? { productType: translatedProductType } : {}),
+            ...(typeof translatedBrand === "string" ? { brand: translatedBrand } : {}),
+          };
+          lastRequestRef.current = nextRequest;
+          saveLastResult(data.result, nextRequest);
+        } else {
+          saveLastResult(data.result);
+        }
       })
       .catch(() => setAnalyzeErrorToast(true))
       .finally(() => setIsUpdatingResultLocale(false));
-  }, [locale, result]);
+  }, [locale, result, draftProductType, draftBrand]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background-light dark:bg-background-dark">
@@ -111,19 +135,23 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-stretch">
-          <section className="flex flex-col lg:col-span-6">
-            <div className="flex flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-              <div className="shrink-0 rounded-t-xl border-b border-gray-200 bg-white p-4">
-                <h3 className="text-base font-bold tracking-tight text-black">
+          <section className="flex min-h-0 flex-col lg:col-span-6">
+            <div className="flex min-h-[32rem] flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:bg-slate-900 dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] lg:min-h-[36rem]">
+              <div className="shrink-0 rounded-t-xl border-b border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                <h3 className="text-base font-bold tracking-tight text-black dark:text-slate-100">
                   {t("home.inputDetails")}
                 </h3>
               </div>
               <div className="p-6">
                 <ListingForm
-                onResult={handleResult}
-                onGeneratingChange={setIsGeneratingResult}
-                onAnalyzeError={() => setAnalyzeErrorToast(true)}
-              />
+                  onResult={handleResult}
+                  onGeneratingChange={setIsGeneratingResult}
+                  onAnalyzeError={() => setAnalyzeErrorToast(true)}
+                  productType={draftProductType}
+                  onProductTypeChange={setDraftProductType}
+                  brand={draftBrand}
+                  onBrandChange={setDraftBrand}
+                />
               </div>
             </div>
           </section>
@@ -133,9 +161,9 @@ export default function Home() {
             className={result ? "flex min-h-0 flex-col lg:col-span-6" : "hidden lg:flex lg:min-h-0 lg:flex-col lg:col-span-6"}
             aria-label={t("home.optimizedResult")}
           >
-            <div className="flex min-h-0 flex-1 flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+            <div className="flex min-h-0 flex-1 flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:bg-slate-900 dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] lg:overflow-hidden">
               <div
-                className={`shrink-0 rounded-t-xl border-b border-gray-200 bg-white p-4 ${!result || isEmptyResult(result) ? "max-md:hidden" : ""}`}
+                className={`shrink-0 rounded-t-xl border-b border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 ${!result || isEmptyResult(result) ? "max-md:hidden" : ""}`}
               >
                 {result ? (
                   <div className="flex items-center justify-between gap-2">
@@ -153,16 +181,16 @@ export default function Home() {
                     </span>
                   </div>
                 ) : (
-                  <h3 className="text-base font-bold tracking-tight text-black">
+                  <h3 className="text-base font-bold tracking-tight text-black dark:text-slate-100">
                     {t("home.optimizedResult")}
                   </h3>
                 )}
               </div>
-              <div className="relative flex min-h-0 flex-1 flex-col">
+              <div className="relative flex min-h-0 flex-1 flex-col scrollbar-thin lg:overflow-y-auto">
                 {result ? (
                   <>
                     <div
-                      className={`flex flex-col transition-[filter] duration-200 ${
+                      className={`flex min-h-0 flex-1 flex-col transition-[filter] duration-200 ${
                         isGeneratingResult ? "pointer-events-none select-none blur-sm" : ""
                       }`}
                     >
@@ -170,12 +198,12 @@ export default function Home() {
                     </div>
                     {isGeneratingResult && (
                       <div
-                        className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-b-xl bg-white/70 backdrop-blur-[2px]"
+                        className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-b-xl bg-white/70 backdrop-blur-[2px] dark:bg-slate-900/70"
                         aria-live="polite"
                         aria-busy="true"
                       >
                         <MaterialIcon name="progress_activity" className="animate-spin text-4xl text-[#007780]" aria-hidden />
-                        <p className="text-sm font-medium text-slate-700">{t("form.generating")}</p>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("form.generating")}</p>
                       </div>
                     )}
                   </>
@@ -191,7 +219,7 @@ export default function Home() {
           <FeatureCards />
         </section>
 
-        <footer className="mt-auto border-t border-gray-300 pt-4 pb-0 text-center dark:border-gray-500">
+        <footer className="mt-auto border-t border-gray-300 pt-4 pb-0 text-center dark:border-slate-700">
           <p className="text-xs text-slate-400 dark:text-slate-500">
             {t("footer.loveShopping")}{" "}
             <a

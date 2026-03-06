@@ -37,16 +37,29 @@ export interface ListingFormProps {
   onResult: (result: ListingResult, request?: AnalyzeRequest) => void;
   onGeneratingChange?: (isGenerating: boolean) => void;
   onAnalyzeError?: () => void;
+  productType?: string;
+  onProductTypeChange?: (value: string) => void;
+  brand?: string;
+  onBrandChange?: (value: string) => void;
 }
 
-export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: ListingFormProps) {
+export function ListingForm({
+  onResult,
+  onGeneratingChange,
+  onAnalyzeError,
+  productType: productTypeProp,
+  onProductTypeChange,
+  brand: brandProp,
+  onBrandChange,
+}: ListingFormProps) {
   const { t, locale } = useLanguage();
   const [files, setFiles] = useState<File[]>([]);
   const [condition, setCondition] = useState<ConditionOption | "">("");
-  const [productType, setProductType] = useState("");
-  const [brand, setBrand] = useState("");
+  const [productTypeInternal, setProductTypeInternal] = useState("");
+  const [brandInternal, setBrandInternal] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorField, setErrorField] = useState<"images" | "condition" | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [conditionOpen, setConditionOpen] = useState(false);
@@ -59,6 +72,11 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
   const conditionButtonRef = useRef<HTMLButtonElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+
+  const productType = productTypeProp ?? productTypeInternal;
+  const setProductType = onProductTypeChange ?? setProductTypeInternal;
+  const brand = brandProp ?? brandInternal;
+  const setBrand = onBrandChange ?? setBrandInternal;
 
   useEffect(() => {
     if (!conditionOpen || !conditionButtonRef.current) return;
@@ -86,12 +104,15 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrorField(null);
     if (!files.length) {
       setError(t("form.addOneImage"));
+      setErrorField("images");
       return;
     }
     if (!condition) {
       setError(t("form.selectConditionError"));
+      setErrorField("condition");
       return;
     }
     setLoading(true);
@@ -126,6 +147,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
     } catch {
       onAnalyzeError?.();
       setError(null);
+      setErrorField(null);
     } finally {
       setLoading(false);
       onGeneratingChange?.(false);
@@ -200,7 +222,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
 
   useEffect(() => {
     if (!maxPhotosToast) return;
-    const id = setTimeout(() => setMaxPhotosToast(false), 3000);
+    const id = setTimeout(() => setMaxPhotosToast(false), 4500);
     return () => clearTimeout(id);
   }, [maxPhotosToast]);
 
@@ -275,7 +297,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
               <MaterialIcon name="add_a_photo" className="text-primary leading-none" style={{ color: "#007780", fontSize: "3rem" }} />
             </span>
             <div className="relative z-0 flex flex-col gap-1">
-              <p className="whitespace-nowrap text-sm font-bold text-black">{t("form.uploadPhotos", { max: MAX_IMAGES })}</p>
+              <p className="whitespace-nowrap text-sm font-bold text-black dark:text-slate-100">{t("form.uploadPhotos", { max: MAX_IMAGES })}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">{t("form.dragDrop")}</p>
             </div>
             <div className="relative z-10 mt-4 flex w-full flex-col gap-2 sm:flex-row sm:flex-initial sm:flex-wrap sm:justify-center">
@@ -290,7 +312,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
               <button
                 type="button"
                 onClick={() => galleryInputRef.current?.click()}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-0 sm:w-auto sm:flex-1 sm:min-w-0"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-0 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:w-auto sm:flex-1 sm:min-w-0"
               >
                 <MaterialIcon name="photo_library" className="text-lg shrink-0" />
                 {t("form.chooseFromGallery")}
@@ -307,7 +329,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
           >
             {dragActive && (
               <div
-                className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm"
+                className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm dark:bg-slate-900/60"
                 aria-hidden
               >
                 <span className="rounded-lg border-2 border-dashed border-[#007780] bg-[#007780]/90 px-4 py-2.5 text-sm font-semibold text-white shadow-md">
@@ -316,7 +338,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
               </div>
             )}
             <div
-              className={`relative flex w-full gap-3 overflow-x-auto rounded-xl pb-2 sm:gap-4 ${dragActive ? "ring-2 ring-[#007780] ring-inset" : ""}`}
+              className={`relative flex w-full gap-3 overflow-x-auto rounded-xl pb-2 scrollbar-thin sm:gap-4 ${dragActive ? "ring-2 ring-[#007780] ring-inset" : ""}`}
             >
             {files.length < MAX_IMAGES && (
               <div
@@ -333,7 +355,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
                 }
               >
                 <MaterialIcon name="add_a_photo" className="shrink-0" style={{ color: "#007780", fontSize: "1.75rem" }} />
-                <p className="whitespace-nowrap text-xs font-bold text-black sm:text-sm">{t("form.uploadPhotos", { max: MAX_IMAGES })}</p>
+                <p className="whitespace-nowrap text-xs font-bold text-black dark:text-slate-100 sm:text-sm">{t("form.uploadPhotos", { max: MAX_IMAGES })}</p>
                 <p className="hidden text-[10px] text-slate-500 sm:block sm:text-xs">{t("form.dragDropShort")}</p>
                 <div className="mt-1 flex gap-1.5">
                   <button
@@ -347,7 +369,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
                   <button
                     type="button"
                     onClick={() => galleryInputRef.current?.click()}
-                    className="flex size-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-0 sm:size-9"
+                    className="flex size-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-0 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:size-9"
                     aria-label={t("form.chooseFromGallery")}
                   >
                     <MaterialIcon name="photo_library" className="text-base" />
@@ -368,7 +390,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
                   decoding="async"
                   style={{ imageRendering: "auto" }}
                 />
-                <div className="absolute right-1 top-1 flex flex-col gap-0.5">
+                <div className="absolute right-1 top-1 flex flex-col gap-1.5">
                   <button
                     type="button"
                     onClick={(e) => {
@@ -378,7 +400,11 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
                     className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
                     aria-label={`Remove ${f.name}`}
                   >
-                    <MaterialIcon name="close" className="text-[4px] sm:text-[5px]" />
+                    <span className="flex size-full items-center justify-center">
+                      <svg className="size-4 shrink-0 sm:size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
+                        <path d="M18 6L6 18M6 6l12 12" />
+                      </svg>
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -389,14 +415,20 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
                     className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
                     aria-label={`Download ${f.name}`}
                   >
-                    <MaterialIcon name="download" className="text-[4px] sm:text-[5px]" />
+                    <span className="flex size-full items-center justify-center">
+                      <svg className="size-4 shrink-0 sm:size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                    </span>
                   </button>
                 </div>
               </div>
             ))}
             </div>
             <div
-              className="pointer-events-none absolute right-0 top-0 bottom-2 w-12 shrink-0 bg-gradient-to-l from-white to-transparent"
+              className="pointer-events-none absolute right-0 top-0 bottom-2 w-12 shrink-0 bg-gradient-to-l from-white to-transparent dark:from-slate-900"
               aria-hidden
             />
           </div>
@@ -404,16 +436,16 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
 
         <div className="space-y-4">
           <div className="flex flex-col gap-2" ref={conditionDropdownRef}>
-            <label className="text-sm font-medium text-black">{t("form.condition")}</label>
+            <label className="text-sm font-medium text-black dark:text-slate-200">{t("form.condition")}</label>
             <div className="relative">
               <button
                 ref={conditionButtonRef}
                 type="button"
                 onClick={() => setConditionOpen((open) => !open)}
-                className={`flex w-full items-center justify-between rounded-lg border bg-white px-4 py-3 text-left text-sm text-slate-900 shadow-sm transition-colors focus:outline-none focus:ring-0 ${
+                className={`flex w-full items-center justify-between rounded-lg border bg-white px-4 py-3 text-left text-sm text-slate-900 shadow-sm transition-colors focus:outline-none focus:ring-0 dark:bg-slate-800 dark:text-slate-200 ${
                   conditionOpen
                     ? "border-2 border-[#007780] px-[15px] py-[11px] shadow-[0_0_0_1px_#007780]"
-                    : "border border-slate-300 hover:border-slate-400"
+                    : "border border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500"
                 }`}
                 aria-haspopup="listbox"
                 aria-expanded={conditionOpen}
@@ -433,7 +465,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
                   <ul
                     ref={conditionListRef}
                     role="listbox"
-                    className="fixed z-[100] max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                    className="fixed z-[100] max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-600 dark:bg-slate-800"
                     style={{
                       top: dropdownPosition.top,
                       left: dropdownPosition.left,
@@ -451,7 +483,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
                           className={`w-full px-4 py-2.5 text-left text-sm transition-colors focus:outline-none focus:ring-0 ${
                             condition === opt
                               ? "bg-[#007780]/10 font-medium text-[#007780]"
-                              : "text-slate-700 hover:bg-slate-100"
+                              : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                           }`}
                         >
                           {t(`condition.${opt}`)}
@@ -479,7 +511,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
 
           <div className={`space-y-4 ${showMoreOptions ? "block" : "hidden md:block"}`}>
               <div className="flex flex-col gap-2">
-                <label htmlFor="productType" className="text-sm font-medium text-black">
+                <label htmlFor="productType" className="text-sm font-medium text-black dark:text-slate-200">
                   {t("form.productTypeOptional")}{" "}
                   <span className="text-xs font-normal text-slate-400">{t("form.optional")}</span>
                 </label>
@@ -492,11 +524,11 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
                   })()}
                   value={productType}
                   onChange={(e) => setProductType(e.target.value)}
-                  className="input-material bg-white !text-black"
+                  className="input-material bg-white !text-black dark:bg-slate-800 dark:!text-slate-200"
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="brand" className="text-sm font-medium text-black">
+                <label htmlFor="brand" className="text-sm font-medium text-black dark:text-slate-200">
                   {t("form.brandOptional")}{" "}
                   <span className="text-xs font-normal text-slate-400">{t("form.optional")}</span>
                 </label>
@@ -509,13 +541,13 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
                   })()}
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
-                  className="input-material bg-white !text-black"
+                  className="input-material bg-white !text-black dark:bg-slate-800 dark:!text-slate-200"
                 />
               </div>
             </div>
           </div>
 
-        {error && <p className="text-sm font-normal text-red-600">{error}</p>}
+        {error && <p className="text-sm font-normal text-red-600 dark:text-red-400">{error}</p>}
         <button
           type="submit"
           disabled={loading}
@@ -525,7 +557,7 @@ export function ListingForm({ onResult, onGeneratingChange, onAnalyzeError }: Li
           {loading ? (
             <span className="inline-flex items-baseline">
               {t("form.generating")}
-              <span className="ml-0.5 inline-flex">
+              <span className="ml-1.5 inline-flex">
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}

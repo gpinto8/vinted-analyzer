@@ -92,7 +92,7 @@ export function CameraCaptureModal({ isOpen, onClose, onCapture }: CameraCapture
       aria-modal="true"
     >
       <div
-        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-white shadow-xl"
+        className="flex w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-white shadow-xl dark:bg-slate-900"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative aspect-[4/3] bg-black">
@@ -120,7 +120,7 @@ export function CameraCaptureModal({ isOpen, onClose, onCapture }: CameraCapture
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg border border-slate-300 bg-white py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            className="flex-1 rounded-lg border border-slate-300 bg-white py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             Cancel
           </button>

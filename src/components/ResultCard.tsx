@@ -36,13 +36,13 @@ function DetailRow({
   if (!value && !disabled) return null;
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-      <h4 className="text-sm font-bold text-black sm:w-28 sm:shrink-0">{label}</h4>
+      <h4 className="text-sm font-bold text-black dark:text-slate-200 sm:w-28 sm:shrink-0">{label}</h4>
       <div
-        className={`flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 px-3 py-2.5 ${
-          disabled ? "cursor-not-allowed bg-gray-100" : "bg-white"
+        className={`flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 px-3 py-2.5 dark:border-slate-700 ${
+          disabled ? "cursor-not-allowed bg-gray-100 dark:bg-slate-800" : "bg-white dark:bg-slate-800"
         }`}
       >
-        <p className="min-w-0 flex-1 text-sm font-medium text-black">{value}</p>
+        <p className="min-w-0 flex-1 text-sm font-medium text-black dark:text-slate-200">{value}</p>
         {!disabled && onCopy && (
           <button
             type="button"
@@ -106,19 +106,19 @@ export function ResultCard({ data }: { data: ListingResult }) {
 
   if (isEmptyResult) {
     return (
-      <div className="flex flex-1 flex-col p-6">
+      <div className="flex min-h-0 flex-1 flex-col p-6">
         <EmptyResult />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-col space-y-6 p-6">
-      <div className="space-y-6">
+    <div className="flex min-h-0 flex-1 flex-col p-6">
+      <div className="scrollbar-thin min-h-0 flex-1 space-y-6 overflow-y-auto pr-1">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-          <h4 className="text-sm font-bold text-black sm:w-28 sm:shrink-0">{t("result.title")}</h4>
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5">
-            <p className="min-w-0 flex-1 text-sm font-medium text-black">{title}</p>
+          <h4 className="text-sm font-bold text-black dark:text-slate-200 sm:w-28 sm:shrink-0">{t("result.title")}</h4>
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+            <p className="min-w-0 flex-1 text-sm font-medium text-black dark:text-slate-200">{title}</p>
             <button
               type="button"
               onClick={handleCopyTitle}
@@ -130,10 +130,10 @@ export function ResultCard({ data }: { data: ListingResult }) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
-          <h4 className="text-sm font-bold text-black sm:w-28 sm:shrink-0 sm:pt-2.5">{t("result.description")}</h4>
-          <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white">
-            <p className="scrollbar-thin min-h-[7.5rem] max-h-[7.5rem] min-w-0 flex-1 overflow-y-auto whitespace-pre-wrap px-3 py-2.5 pr-20 text-sm leading-relaxed text-black">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3 sm:mb-4 pb-4">
+          <h4 className="text-sm font-bold text-black dark:text-slate-200 sm:w-28 sm:shrink-0 sm:pt-2.5">{t("result.description")}</h4>
+          <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800">
+            <p className="scrollbar-thin min-h-[7.5rem] max-h-[7.5rem] min-w-0 flex-1 overflow-y-auto whitespace-pre-wrap px-3 py-2.5 pr-20 pb-4 text-sm leading-relaxed text-black dark:text-slate-200">
               {description}
             </p>
             <button
@@ -147,9 +147,8 @@ export function ResultCard({ data }: { data: ListingResult }) {
           </div>
         </div>
       </div>
-
       {(data.productType ?? data.category ?? data.brand ?? data.size ?? data.measurements ?? data.condition ?? data.color ?? ((data.priceNew != null && data.priceNew > 0) || (data.priceSuggested != null && data.priceSuggested > 0))) && (
-        <div className="space-y-4 border-t border-gray-200 pt-4">
+        <div className="space-y-4 border-t border-gray-200 pt-6 pb-6 dark:border-slate-700">
           {data.productType && (
             <DetailRow
               label={t("result.productType")}
@@ -229,8 +228,8 @@ export function ResultCard({ data }: { data: ListingResult }) {
       )}
 
       {(data.sources?.length ?? 0) > 0 && (
-        <div className="space-y-2 border-t border-gray-200 pt-4">
-          <h4 className="text-sm font-bold text-black">{t("result.sources")}</h4>
+        <div className="space-y-2 border-t border-gray-200 pt-4 dark:border-slate-700">
+          <h4 className="text-sm font-bold text-black dark:text-slate-200">{t("result.sources")}</h4>
           <ul className="flex flex-wrap gap-2">
             {data.sources!.map((s, i) => (
               <li key={i}>
@@ -238,7 +237,7 @@ export function ResultCard({ data }: { data: ListingResult }) {
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-[#007780] transition-colors hover:bg-[#007780]/10"
+                  className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-[#007780] transition-colors hover:bg-[#007780]/10 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-[#007780]/20"
                 >
                   {s.name}
                   <MaterialIcon name="open_in_new" className="text-sm" />
@@ -250,8 +249,8 @@ export function ResultCard({ data }: { data: ListingResult }) {
       )}
 
       {!isEmptyResult && verifyLinks.length > 0 && (
-        <div className="space-y-2 border-t border-gray-200 pt-4">
-          <h4 className="text-sm font-bold text-black">{t("result.verifyListing")}</h4>
+        <div className="space-y-2 border-t border-gray-200 pt-7 dark:border-slate-700">
+          <h4 className="text-sm font-bold text-black dark:text-slate-200">{t("result.verifyListing")}</h4>
           <p className="text-xs text-slate-600 dark:text-slate-400">{t("result.verifySitesHint")}</p>
           <ul className="flex flex-wrap gap-2">
             {verifyLinks.map((link) => (
@@ -260,7 +259,7 @@ export function ResultCard({ data }: { data: ListingResult }) {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-lg border border-[#007780] bg-[#007780]/5 px-3 py-2 text-sm font-medium text-[#007780] transition-colors hover:bg-[#007780]/15"
+                  className="inline-flex items-center gap-1 rounded-lg border border-[#007780] bg-[#007780]/5 px-3 py-2 text-sm font-medium text-[#007780] transition-colors hover:bg-[#007780]/15 dark:bg-[#007780]/10 dark:hover:bg-[#007780]/25"
                 >
                   {link.name}
                   <MaterialIcon name="open_in_new" className="text-sm" />

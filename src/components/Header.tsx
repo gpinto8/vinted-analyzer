@@ -49,6 +49,7 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
   const langButtonRef = useRef<HTMLButtonElement>(null);
   const langListRef = useRef<HTMLUListElement>(null);
   const { t, locale, setLocale } = useLanguage();
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (langOpen && langButtonRef.current) {
@@ -83,7 +84,7 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
   }
 
   return (
-    <header className="isolate sticky top-0 z-50 w-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.15)] backdrop-blur-none">
+    <header className="isolate sticky top-0 z-50 w-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] backdrop-blur-none dark:bg-slate-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <button
           type="button"
@@ -95,20 +96,28 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
           <h1 className="text-xl font-bold tracking-tight text-primary" style={{ color: "#007780" }}>Vinted Analyzer</h1>
         </button>
 
-        <nav className="hidden items-center gap-3 md:flex">
+        <nav className="hidden items-center gap-2 md:flex">
           <button
             type="button"
             onClick={onHowItWorksClick}
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-500"
+            className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-500 dark:text-slate-300 dark:hover:text-slate-200"
           >
             {t("header.howItWorks")}
+          </button>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-0 active:bg-transparent dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            <MaterialIcon name={isDark ? "light_mode" : "dark_mode"} className="text-2xl" />
           </button>
           <div className="relative">
             <button
               ref={langButtonRef}
               type="button"
               onClick={() => setLangOpen((o) => !o)}
-              className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-0"
+              className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-0 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
               aria-label={t("header.language")}
               aria-expanded={langOpen}
               aria-haspopup="listbox"
@@ -121,7 +130,7 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
                 <ul
                   ref={langListRef}
                   role="listbox"
-                  className="fixed z-[100] min-w-[140px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                  className="fixed z-[100] min-w-[140px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-600 dark:bg-slate-800"
                   style={
                     menuOpen
                       ? { top: 112, left: 16 }
@@ -139,7 +148,7 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
                         className={`w-full px-4 py-2 text-left text-sm transition-colors focus:outline-none focus:ring-0 ${
                           locale === loc.value
                             ? "bg-[#007780]/10 font-medium text-[#007780]"
-                            : "text-slate-700 hover:bg-slate-100"
+                            : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                         }`}
                       >
                         {t(loc.labelKey)}
@@ -150,16 +159,6 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
                 document.body
               )}
           </div>
-          {/* Dark mode - re-enable later
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-black transition-colors hover:text-gray-600 focus:outline-none focus:ring-0 active:bg-transparent"
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            <MaterialIcon name={isDark ? "light_mode" : "dark_mode"} className="text-2xl" />
-          </button>
-          */}
           <button
             type="button"
             onClick={onSignInClick}
@@ -183,7 +182,7 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
       {menuOpen && (
         <>
           <div
-            className="fixed inset-0 top-16 z-40 bg-white/50 md:hidden"
+            className="fixed inset-0 top-16 z-40 bg-white/50 dark:bg-black/50 md:hidden"
             aria-hidden
             onClick={() => {
               setMenuOpen(false);
@@ -191,28 +190,35 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
             }}
           />
           <nav
-            className="absolute left-0 right-0 z-50 flex w-full flex-row items-start justify-between gap-4 bg-white px-4 py-3 md:hidden"
+            className="absolute left-0 right-0 z-50 flex w-full flex-row items-start justify-between gap-4 bg-white px-4 py-3 dark:bg-slate-900 md:hidden"
             role="dialog"
             aria-label="Mobile menu"
           >
-            <div className="relative flex flex-col items-start">
+            <div className="relative flex flex-row items-center gap-1">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-0 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                <MaterialIcon name={isDark ? "light_mode" : "dark_mode"} className="text-2xl" />
+              </button>
               <button
                 type="button"
                 onClick={() => setLangOpen((o) => !o)}
-                className="flex items-center gap-2 rounded-lg border-0 bg-transparent py-2 text-left text-sm font-medium text-slate-600 transition-colors hover:text-slate-500 focus:outline-none focus:ring-0"
+                className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-0 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                 aria-label={t("header.language")}
                 aria-expanded={langOpen}
                 aria-haspopup="listbox"
               >
-                <MaterialIcon name="language" className="text-xl" />
-                {t(`languages.${locale}`)}
+                <MaterialIcon name="language" className="text-2xl" />
               </button>
             </div>
             <div className="flex flex-col items-end gap-2">
               <button
                 type="button"
                 onClick={handleHowItWorks}
-                className="w-fit border-0 bg-transparent py-2 text-right text-sm font-medium text-slate-600 transition-colors hover:text-slate-500 focus:outline-none focus:ring-0"
+                className="w-fit border-0 bg-transparent py-2 text-right text-sm font-medium text-slate-600 transition-colors hover:text-slate-500 focus:outline-none focus:ring-0 dark:text-slate-300 dark:hover:text-slate-200"
               >
                 {t("header.howItWorks")}
               </button>
