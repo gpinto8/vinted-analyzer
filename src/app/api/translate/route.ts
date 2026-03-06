@@ -69,7 +69,9 @@ function applyTranslations(
   for (const key of TEXT_KEYS) {
     const value = result[key];
     if (typeof value === "string" && value.trim()) {
-      if (translations[idx] !== undefined) out[key as keyof ListingResult] = translations[idx];
+      if (translations[idx] !== undefined) {
+        (out as Record<string, string | undefined>)[key] = translations[idx];
+      }
       idx++;
     }
   }
