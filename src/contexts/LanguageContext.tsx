@@ -55,23 +55,43 @@ export function useLanguage() {
   return ctx;
 }
 
+function waitForIconFont(timeout = 5000): Promise<void> {
+  if (typeof document === "undefined") return Promise.resolve();
+  return new Promise((resolve) => {
+    const fallback = setTimeout(resolve, timeout);
+    document.fonts
+      .load('24px "Material Symbols Outlined"')
+      .then(() => { clearTimeout(fallback); resolve(); })
+      .catch(() => { clearTimeout(fallback); resolve(); });
+  });
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("it");
   const [translations, setTranslations] = useState<Translations>({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [translationsReady, setTranslationsReady] = useState(false);
+  const [fontsReady, setFontsReady] = useState(false);
+  const isLoading = !translationsReady || !fontsReady;
 
   useEffect(() => {
     setLocaleState(getStoredLocale());
   }, []);
 
   useEffect(() => {
-    setIsLoading(true);
+    waitForIconFont().then(() => {
+      setFontsReady(true);
+      document.documentElement.classList.add("fonts-loaded");
+    });
+  }, []);
+
+  useEffect(() => {
+    setTranslationsReady(false);
     localeModules[locale]()
       .then((m) => {
         setTranslations(m.default);
-        setIsLoading(false);
+        setTranslationsReady(true);
       })
-      .catch(() => setIsLoading(false));
+      .catch(() => setTranslationsReady(true));
   }, [locale]);
 
   const setLocale = useCallback((newLocale: Locale) => {

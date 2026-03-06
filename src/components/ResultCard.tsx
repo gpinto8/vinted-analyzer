@@ -5,6 +5,7 @@ import { MaterialIcon } from "./MaterialIcon";
 import { EmptyResult } from "./EmptyResult";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getVerifyLinks } from "@/lib/verify-links";
+import { CONDITION_OPTIONS } from "@/types/listing";
 import type { ListingResult } from "@/types/listing";
 
 async function copyToClipboard(text: string): Promise<boolean> {
@@ -35,8 +36,8 @@ function DetailRow({
 }) {
   if (!value && !disabled) return null;
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-      <h4 className="text-sm font-bold text-black dark:text-slate-200 sm:w-28 sm:shrink-0">{label}</h4>
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+      <h4 className="text-sm font-bold text-black dark:text-slate-200 sm:w-28 sm:shrink-0 sm:pt-2.5">{label}</h4>
       <div
         className={`flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 px-3 py-2.5 dark:border-slate-700 ${
           disabled ? "cursor-not-allowed bg-gray-100 dark:bg-slate-800" : "bg-white dark:bg-slate-800"
@@ -47,10 +48,10 @@ function DetailRow({
           <button
             type="button"
             onClick={onCopy}
-            className="group flex shrink-0 items-center gap-1 text-xs font-bold text-[#007780]"
+            className="group flex shrink-0 items-center gap-1 text-xs font-bold text-[#007780] transition-colors hover:text-[#006269] dark:hover:text-[#0099a3]"
           >
             <MaterialIcon name="content_copy" className="text-sm" />
-            <span className="hidden sm:inline group-hover:underline">{copied ? copiedLabel : copyLabel}</span>
+            <span className="hidden sm:inline">{copied ? copiedLabel : copyLabel}</span>
           </button>
         )}
       </div>
@@ -113,8 +114,8 @@ export function ResultCard({ data }: { data: ListingResult }) {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col p-6">
-      <div className="scrollbar-thin min-h-0 flex-1 space-y-6 overflow-y-auto pr-1">
+    <div className="relative flex min-h-0 flex-1 flex-col p-6 lg:max-h-[600px] lg:overflow-y-auto lg:h-[600px] lg:scrollbar-thin">
+      <div className="space-y-6 pr-1">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
           <h4 className="text-sm font-bold text-black dark:text-slate-200 sm:w-28 sm:shrink-0">{t("result.title")}</h4>
           <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
@@ -122,27 +123,36 @@ export function ResultCard({ data }: { data: ListingResult }) {
             <button
               type="button"
               onClick={handleCopyTitle}
-              className="group flex shrink-0 items-center gap-1 text-xs font-bold text-[#007780]"
+              className="group flex shrink-0 items-center gap-1 text-xs font-bold text-[#007780] transition-colors hover:text-[#006269] dark:hover:text-[#0099a3]"
             >
               <MaterialIcon name="content_copy" className="text-sm" />
-              <span className="hidden group-hover:underline sm:inline">{copiedTitle ? t("result.copied") : t("result.copy")}</span>
+              <span className="hidden sm:inline">{copiedTitle ? t("result.copied") : t("result.copy")}</span>
             </button>
           </div>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3 sm:mb-4 pb-4">
           <h4 className="text-sm font-bold text-black dark:text-slate-200 sm:w-28 sm:shrink-0 sm:pt-2.5">{t("result.description")}</h4>
-          <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800">
-            <p className="scrollbar-thin min-h-[7.5rem] max-h-[7.5rem] min-w-0 flex-1 overflow-y-auto whitespace-pre-wrap px-3 py-2.5 pr-20 pb-4 text-sm leading-relaxed text-black dark:text-slate-200">
-              {description}
-            </p>
+          <div className="relative flex h-[7.5rem] min-h-[7.5rem] min-w-0 flex-1 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800">
+            <div className="scrollbar-thin min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-2.5 pr-20 pb-4 text-sm leading-relaxed text-black dark:text-slate-200">
+              {(description.trim() ? description.split(/\n\n+/) : [""]).map((paragraph, i) => (
+                <p key={i} className={i > 0 ? "mt-3" : ""}>
+                  {paragraph.split("\n").map((line, j) => (
+                    <span key={j}>
+                      {line}
+                      {j < paragraph.split("\n").length - 1 && <br />}
+                    </span>
+                  ))}
+                </p>
+              ))}
+            </div>
             <button
               type="button"
               onClick={handleCopyDescription}
-              className="group absolute right-4 top-1/2 flex -translate-y-1/2 shrink-0 items-center gap-1 text-xs font-bold text-[#007780]"
+              className="group absolute right-4 top-1/2 flex -translate-y-1/2 shrink-0 items-center gap-1 text-xs font-bold text-[#007780] transition-colors hover:text-[#006269] dark:hover:text-[#0099a3]"
             >
               <MaterialIcon name="content_copy" className="text-sm" />
-              <span className="hidden group-hover:underline sm:inline">{copiedDesc ? t("result.copied") : t("result.copy")}</span>
+              <span className="hidden sm:inline">{copiedDesc ? t("result.copied") : t("result.copy")}</span>
             </button>
           </div>
         </div>
@@ -194,7 +204,22 @@ export function ResultCard({ data }: { data: ListingResult }) {
             />
           )}
           {data.condition && (
-            <DetailRow label={t("result.condition")} value={data.condition ? t(`condition.${data.condition}`) : ""} disabled copyLabel={t("result.copy")} copiedLabel={t("result.copied")} />
+            <DetailRow
+              label={t("result.condition")}
+              value={
+                (() => {
+                  const key = data.condition as string;
+                  if (CONDITION_OPTIONS.includes(key as (typeof CONDITION_OPTIONS)[number])) {
+                    return t(`condition.${key}`);
+                  }
+                  const translated = t(`condition.${key}`);
+                  return translated === `condition.${key}` ? key : translated;
+                })()
+              }
+              disabled
+              copyLabel={t("result.copy")}
+              copiedLabel={t("result.copied")}
+            />
           )}
           <DetailRow
             label={t("result.color")}
@@ -252,23 +277,27 @@ export function ResultCard({ data }: { data: ListingResult }) {
         <div className="space-y-2 border-t border-gray-200 pt-7 dark:border-slate-700">
           <h4 className="text-sm font-bold text-black dark:text-slate-200">{t("result.verifyListing")}</h4>
           <p className="text-xs text-slate-600 dark:text-slate-400">{t("result.verifySitesHint")}</p>
-          <ul className="flex flex-wrap gap-2">
+          <ul className="flex flex-wrap gap-1.5">
             {verifyLinks.map((link) => (
               <li key={`${link.name}-${link.url}`}>
                 <a
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-lg border border-[#007780] bg-[#007780]/5 px-3 py-2 text-sm font-medium text-[#007780] transition-colors hover:bg-[#007780]/15 dark:bg-[#007780]/10 dark:hover:bg-[#007780]/25"
+                  className="inline-flex items-center gap-1 rounded-md border border-[#007780] bg-[#007780]/5 px-2 py-1.5 text-xs font-medium text-[#007780] transition-colors hover:bg-[#007780]/15 dark:bg-[#007780]/10 dark:hover:bg-[#007780]/25"
                 >
                   {link.name}
-                  <MaterialIcon name="open_in_new" className="text-sm" />
+                  <MaterialIcon name="open_in_new" className="text-[10px]" />
                 </a>
               </li>
             ))}
           </ul>
         </div>
       )}
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 right-0 hidden h-16 bg-gradient-to-t from-white to-transparent dark:from-slate-900 lg:block"
+        aria-hidden
+      />
     </div>
   );
 }

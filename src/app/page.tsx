@@ -10,6 +10,7 @@ import { FeatureCards } from "@/components/FeatureCards";
 import { ComingSoonModal } from "@/components/ComingSoonModal";
 import { HowItWorksModal } from "@/components/HowItWorksModal";
 import { MaterialIcon } from "@/components/MaterialIcon";
+import { PageSkeleton } from "@/components/PageSkeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLastResult, saveLastResult } from "@/lib/listing-storage";
 import type { ListingResult } from "@/types/listing";
@@ -17,10 +18,11 @@ import type { ListingResult } from "@/types/listing";
 const OPTIMIZED_RESULT_ID = "optimized-result";
 
 export default function Home() {
-  const { t, locale } = useLanguage();
+  const { t, locale, isLoading } = useLanguage();
   const [result, setResult] = useState<ListingResult | null>(null);
   const [draftProductType, setDraftProductType] = useState("");
   const [draftBrand, setDraftBrand] = useState("");
+  const [formFiles, setFormFiles] = useState<File[]>([]);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [isUpdatingResultLocale, setIsUpdatingResultLocale] = useState(false);
@@ -28,6 +30,38 @@ export default function Home() {
   const [notClothingToast, setNotClothingToast] = useState(false);
   const [analyzeErrorToast, setAnalyzeErrorToast] = useState(false);
   const lastRequestRef = useRef<AnalyzeRequest | null>(null);
+  const notClothingToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const analyzeErrorToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const TOAST_DURATION_MS = 6000;
+
+  const startNotClothingToastTimer = useCallback(() => {
+    notClothingToastTimerRef.current = setTimeout(() => {
+      setNotClothingToast(false);
+      notClothingToastTimerRef.current = null;
+    }, TOAST_DURATION_MS);
+  }, []);
+
+  const startAnalyzeErrorToastTimer = useCallback(() => {
+    analyzeErrorToastTimerRef.current = setTimeout(() => {
+      setAnalyzeErrorToast(false);
+      analyzeErrorToastTimerRef.current = null;
+    }, TOAST_DURATION_MS);
+  }, []);
+
+  const pauseNotClothingToastTimer = useCallback(() => {
+    if (notClothingToastTimerRef.current != null) {
+      clearTimeout(notClothingToastTimerRef.current);
+      notClothingToastTimerRef.current = null;
+    }
+  }, []);
+
+  const pauseAnalyzeErrorToastTimer = useCallback(() => {
+    if (analyzeErrorToastTimerRef.current != null) {
+      clearTimeout(analyzeErrorToastTimerRef.current);
+      analyzeErrorToastTimerRef.current = null;
+    }
+  }, []);
 
   const isEmptyResult = useCallback((r: ListingResult) => {
     const title = (r.title ?? "").trim();
@@ -52,20 +86,33 @@ export default function Home() {
 
   useEffect(() => {
     if (!notClothingToast) return;
-    const id = setTimeout(() => setNotClothingToast(false), 6000);
-    return () => clearTimeout(id);
-  }, [notClothingToast]);
+    startNotClothingToastTimer();
+    return () => {
+      if (notClothingToastTimerRef.current != null) {
+        clearTimeout(notClothingToastTimerRef.current);
+        notClothingToastTimerRef.current = null;
+      }
+    };
+  }, [notClothingToast, startNotClothingToastTimer]);
 
   useEffect(() => {
     if (!analyzeErrorToast) return;
-    const id = setTimeout(() => setAnalyzeErrorToast(false), 6000);
-    return () => clearTimeout(id);
-  }, [analyzeErrorToast]);
+    startAnalyzeErrorToastTimer();
+    return () => {
+      if (analyzeErrorToastTimerRef.current != null) {
+        clearTimeout(analyzeErrorToastTimerRef.current);
+        analyzeErrorToastTimerRef.current = null;
+      }
+    };
+  }, [analyzeErrorToast, startAnalyzeErrorToastTimer]);
 
+  const hadResultRef = useRef(false);
   useEffect(() => {
-    if (result) {
+    if (result && !hadResultRef.current) {
+      hadResultRef.current = true;
       document.getElementById(OPTIMIZED_RESULT_ID)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+    if (!result) hadResultRef.current = false;
   }, [result]);
 
   const prevLocaleRef = useRef(locale);
@@ -118,6 +165,18 @@ export default function Home() {
       .finally(() => setIsUpdatingResultLocale(false));
   }, [locale, result, draftProductType, draftBrand]);
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background-light dark:bg-background-dark">
+        <Header
+          onSignInClick={() => setShowComingSoon(true)}
+          onHowItWorksClick={() => setShowHowItWorks(true)}
+        />
+        <PageSkeleton />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-background-light dark:bg-background-dark">
       <Header
@@ -136,7 +195,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-stretch">
           <section className="flex min-h-0 flex-col lg:col-span-6">
-            <div className="flex min-h-[32rem] flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:bg-slate-900 dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] lg:min-h-[36rem]">
+            <div className="flex flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:bg-slate-900 dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
               <div className="shrink-0 rounded-t-xl border-b border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
                 <h3 className="text-base font-bold tracking-tight text-black dark:text-slate-100">
                   {t("home.inputDetails")}
@@ -151,6 +210,8 @@ export default function Home() {
                   onProductTypeChange={setDraftProductType}
                   brand={draftBrand}
                   onBrandChange={setDraftBrand}
+                  files={formFiles}
+                  onFilesChange={setFormFiles}
                 />
               </div>
             </div>
@@ -161,7 +222,7 @@ export default function Home() {
             className={result ? "flex min-h-0 flex-col lg:col-span-6" : "hidden lg:flex lg:min-h-0 lg:flex-col lg:col-span-6"}
             aria-label={t("home.optimizedResult")}
           >
-            <div className="flex min-h-0 flex-1 flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:bg-slate-900 dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] lg:overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col rounded-xl bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)] dark:bg-slate-900 dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] lg:h-[1000px] lg:overflow-hidden">
               <div
                 className={`shrink-0 rounded-t-xl border-b border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 ${!result || isEmptyResult(result) ? "max-md:hidden" : ""}`}
               >
@@ -173,7 +234,10 @@ export default function Home() {
                         {t("home.optimizedResult")}
                       </h3>
                       {isUpdatingResultLocale && (
-                        <span className="text-xs text-slate-500">{t("home.updatingLanguage")}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="hidden text-xs text-slate-500 md:inline">{t("home.updatingLanguage")}</span>
+                          <MaterialIcon name="progress_activity" className="animate-spin text-base text-slate-400 dark:text-slate-500" aria-hidden />
+                        </div>
                       )}
                     </div>
                     <span className="rounded-md bg-[#007780] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
@@ -244,9 +308,11 @@ export default function Home() {
           <div
             role="status"
             aria-live="polite"
-            className="fixed right-4 top-4 z-[100] flex items-start gap-2 rounded-lg border border-amber-400 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-lg dark:border-amber-500 dark:bg-amber-950/90 dark:text-amber-100 lg:top-auto lg:bottom-4"
+            onMouseEnter={pauseNotClothingToastTimer}
+            onMouseLeave={startNotClothingToastTimer}
+            className="fixed right-4 top-[4.5rem] z-[100] flex max-w-lg items-center gap-3 rounded-lg border border-amber-400 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-lg dark:border-amber-500 dark:bg-amber-950/90 dark:text-amber-100 lg:right-4 lg:top-auto lg:bottom-4"
           >
-            <span className="flex-1 pr-1">{t("result.notClothingHint")}</span>
+            <span className="min-w-0 flex-1">{t("result.notClothingHint")}</span>
             <button
               type="button"
               onClick={() => setNotClothingToast(false)}
@@ -264,14 +330,16 @@ export default function Home() {
           <div
             role="alert"
             aria-live="assertive"
-            className="fixed right-4 top-4 z-[100] flex max-w-sm animate-[slideInRight_0.3s_ease-out] items-start gap-3 rounded-xl bg-red-100/95 px-4 py-3.5 dark:bg-red-950/90 lg:top-auto lg:bottom-4"
+            onMouseEnter={pauseAnalyzeErrorToastTimer}
+            onMouseLeave={startAnalyzeErrorToastTimer}
+            className="fixed right-4 top-[4.5rem] z-[100] flex w-[80vw] max-w-[500px] animate-[slideInRight_0.3s_ease-out] items-center gap-3 rounded-xl bg-red-100/95 px-4 py-3.5 dark:bg-red-950/90 lg:right-4 lg:top-auto lg:bottom-4 lg:w-auto lg:max-w-lg"
           >
             <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-red-200/80 dark:bg-red-900/50">
               <MaterialIcon name="error" className="text-xl text-red-700 dark:text-red-300" />
             </div>
-            <div className="min-w-0 flex-1 pt-0.5">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                {t("form.aiErrorFull") === "form.aiErrorFull" ? "We got an error from the AI. Please try again in a moment or check your connection." : t("form.aiErrorFull")}
+                {t("form.aiErrorFull") === "form.aiErrorFull" ? "AI error. Try again or check your connection." : t("form.aiErrorFull")}
               </p>
             </div>
             <button

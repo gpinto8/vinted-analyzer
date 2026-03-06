@@ -41,6 +41,8 @@ export interface ListingFormProps {
   onProductTypeChange?: (value: string) => void;
   brand?: string;
   onBrandChange?: (value: string) => void;
+  files?: File[];
+  onFilesChange?: React.Dispatch<React.SetStateAction<File[]>>;
 }
 
 export function ListingForm({
@@ -51,9 +53,13 @@ export function ListingForm({
   onProductTypeChange,
   brand: brandProp,
   onBrandChange,
+  files: filesProp,
+  onFilesChange,
 }: ListingFormProps) {
   const { t, locale } = useLanguage();
-  const [files, setFiles] = useState<File[]>([]);
+  const [filesInternal, setFilesInternal] = useState<File[]>([]);
+  const files = filesProp !== undefined ? filesProp : filesInternal;
+  const setFiles = onFilesChange ?? setFilesInternal;
   const [condition, setCondition] = useState<ConditionOption | "">("");
   const [productTypeInternal, setProductTypeInternal] = useState("");
   const [brandInternal, setBrandInternal] = useState("");
@@ -157,6 +163,10 @@ export function ListingForm({
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
+    if (errorField === "images") {
+      setError(null);
+      setErrorField(null);
+    }
     const list = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
     setFiles((prev) => {
       const combined = [...prev, ...list];
@@ -164,7 +174,7 @@ export function ListingForm({
       if (next.length === MAX_IMAGES && combined.length > MAX_IMAGES) setMaxPhotosToast(true);
       return next;
     });
-  }, []);
+  }, [errorField]);
 
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -182,6 +192,10 @@ export function ListingForm({
   }, []);
 
   const onFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (errorField === "images") {
+      setError(null);
+      setErrorField(null);
+    }
     const list = Array.from(e.target.files ?? []);
     setFiles((prev) => {
       const combined = [...prev, ...list];
@@ -190,7 +204,7 @@ export function ListingForm({
       return next;
     });
     e.target.value = "";
-  }, []);
+  }, [errorField]);
 
   const previewUrlCacheRef = useRef<Map<File, string>>(new Map());
 
@@ -286,7 +300,7 @@ export function ListingForm({
             onDragLeave={onDragLeave}
             className={`group relative flex min-h-[200px] flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
               dragActive ? "upload-zone upload-zone--active" : "upload-zone"
-            }`}
+            } ${errorField === "images" ? "border-red-500 dark:border-red-400" : ""}`}
             style={
               dragActive
                 ? { borderColor: "#007780", backgroundColor: "rgba(0, 119, 128, 0.1)" }
@@ -297,7 +311,7 @@ export function ListingForm({
               <MaterialIcon name="add_a_photo" className="text-primary leading-none" style={{ color: "#007780", fontSize: "3rem" }} />
             </span>
             <div className="relative z-0 flex flex-col gap-1">
-              <p className="whitespace-nowrap text-sm font-bold text-black dark:text-slate-100">{t("form.uploadPhotos", { max: MAX_IMAGES })}</p>
+              <p className="text-center text-sm font-bold text-black dark:text-slate-100">{t("form.uploadPhotos", { max: MAX_IMAGES })}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">{t("form.dragDrop")}</p>
             </div>
             <div className="relative z-10 mt-4 flex w-full flex-col gap-2 sm:flex-row sm:flex-initial sm:flex-wrap sm:justify-center">
@@ -332,7 +346,7 @@ export function ListingForm({
                 className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60 backdrop-blur-sm dark:bg-slate-900/60"
                 aria-hidden
               >
-                <span className="rounded-lg border-2 border-dashed border-[#007780] bg-[#007780]/90 px-4 py-2.5 text-sm font-semibold text-white shadow-md">
+                <span className="rounded-lg border-2 border-dashed border-[#007780] bg-white/80 px-4 py-2.5 text-sm font-medium text-[#007780] dark:bg-slate-800/80 dark:text-[#00a0a8]">
                   {t("form.dropImagesHere")}
                 </span>
               </div>
@@ -355,7 +369,7 @@ export function ListingForm({
                 }
               >
                 <MaterialIcon name="add_a_photo" className="shrink-0" style={{ color: "#007780", fontSize: "1.75rem" }} />
-                <p className="whitespace-nowrap text-xs font-bold text-black dark:text-slate-100 sm:text-sm">{t("form.uploadPhotos", { max: MAX_IMAGES })}</p>
+                <p className="text-center text-xs font-bold text-black dark:text-slate-100 sm:text-sm">{t("form.uploadPhotosShort", { max: MAX_IMAGES })}</p>
                 <p className="hidden text-[10px] text-slate-500 sm:block sm:text-xs">{t("form.dragDropShort")}</p>
                 <div className="mt-1 flex gap-1.5">
                   <button
@@ -385,7 +399,7 @@ export function ListingForm({
               >
                 <img
                   src={previewUrls[i]}
-                  alt={f.name}
+                  alt={`Listing photo ${i + 1}`}
                   className="h-full w-full object-cover"
                   decoding="async"
                   style={{ imageRendering: "auto" }}
@@ -397,14 +411,12 @@ export function ListingForm({
                       e.stopPropagation();
                       removeFile(i);
                     }}
-                    className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
+                    className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 p-0 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
                     aria-label={`Remove ${f.name}`}
                   >
-                    <span className="flex size-full items-center justify-center">
-                      <svg className="size-4 shrink-0 sm:size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
-                    </span>
+                    <svg className="m-auto block size-3 shrink-0 sm:size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
                   </button>
                   <button
                     type="button"
@@ -412,16 +424,14 @@ export function ListingForm({
                       e.stopPropagation();
                       downloadFile(f, i);
                     }}
-                    className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
+                    className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 p-0 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
                     aria-label={`Download ${f.name}`}
                   >
-                    <span className="flex size-full items-center justify-center">
-                      <svg className="size-4 shrink-0 sm:size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                      </svg>
-                    </span>
+                    <svg className="m-auto block size-3 shrink-0 sm:size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -443,9 +453,11 @@ export function ListingForm({
                 type="button"
                 onClick={() => setConditionOpen((open) => !open)}
                 className={`flex w-full items-center justify-between rounded-lg border bg-white px-4 py-3 text-left text-sm text-slate-900 shadow-sm transition-colors focus:outline-none focus:ring-0 dark:bg-slate-800 dark:text-slate-200 ${
-                  conditionOpen
-                    ? "border-2 border-[#007780] px-[15px] py-[11px] shadow-[0_0_0_1px_#007780]"
-                    : "border border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500"
+                  errorField === "condition"
+                    ? "border-2 border-red-500 dark:border-red-400"
+                    : conditionOpen
+                      ? "border-2 border-[#007780] px-[15px] py-[11px] shadow-[0_0_0_1px_#007780]"
+                      : "border border-slate-300 hover:border-slate-400 focus-visible:border-2 focus-visible:border-[#007780] focus-visible:px-[15px] focus-visible:py-[11px] focus-visible:shadow-[0_0_0_1px_#007780] dark:border-slate-600 dark:hover:border-slate-500 dark:focus-visible:border-[#007780]"
                 }`}
                 aria-haspopup="listbox"
                 aria-expanded={conditionOpen}
@@ -479,6 +491,10 @@ export function ListingForm({
                           onClick={() => {
                             setCondition(opt);
                             setConditionOpen(false);
+                            if (errorField === "condition") {
+                              setError(null);
+                              setErrorField(null);
+                            }
                           }}
                           className={`w-full px-4 py-2.5 text-left text-sm transition-colors focus:outline-none focus:ring-0 ${
                             condition === opt
@@ -524,7 +540,7 @@ export function ListingForm({
                   })()}
                   value={productType}
                   onChange={(e) => setProductType(e.target.value)}
-                  className="input-material bg-white !text-black dark:bg-slate-800 dark:!text-slate-200"
+                  className="input-material border border-slate-300 bg-white !text-black dark:border-slate-600 dark:bg-slate-800 dark:!text-slate-200"
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -541,7 +557,7 @@ export function ListingForm({
                   })()}
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
-                  className="input-material bg-white !text-black dark:bg-slate-800 dark:!text-slate-200"
+                  className="input-material border border-slate-300 bg-white !text-black dark:border-slate-600 dark:bg-slate-800 dark:!text-slate-200"
                 />
               </div>
             </div>
@@ -587,9 +603,9 @@ export function ListingForm({
           <div
             role="status"
             aria-live="polite"
-            className="fixed right-4 top-4 z-[100] flex items-start gap-2 rounded-lg border border-amber-400 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-lg dark:border-amber-500 dark:bg-amber-950/90 dark:text-amber-100 lg:top-auto lg:bottom-4"
+            className="fixed right-4 top-[4.5rem] z-[100] flex max-w-lg items-center gap-3 rounded-lg border border-amber-400 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-lg dark:border-amber-500 dark:bg-amber-950/90 dark:text-amber-100 lg:right-4 lg:top-auto lg:bottom-4"
           >
-            <span className="flex-1 pr-1">{t("form.maxPhotosReached")}</span>
+            <span className="min-w-0 flex-1">{t("form.maxPhotosReached")}</span>
             <button
               type="button"
               onClick={() => setMaxPhotosToast(false)}

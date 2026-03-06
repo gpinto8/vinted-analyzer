@@ -24,6 +24,7 @@
   },
   "form": {
     "uploadPhotos": "Upload up to {max} pics",
+    "uploadPhotosShort": "Max {max} pics",
     "dragDrop": "Drag & drop or use the buttons below",
     "dragDropShort": "Drag & drop",
     "takePhoto": "Take photo",
@@ -45,7 +46,7 @@
     "maxPhotosReached": "Maximum of 20 pics reached.",
     "aiError": "We got an error from the AI.",
     "aiErrorHint": "Please try again in a moment or check your connection.",
-    "aiErrorFull": "We got an error from the AI. Please try again in a moment or check your connection."
+    "aiErrorFull": "AI error. Try again or check your connection."
   },
   "condition": {
     "New": "New",

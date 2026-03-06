@@ -24,6 +24,7 @@
   },
   "form": {
     "uploadPhotos": "Téléchargez jusqu'à {max} photos",
+    "uploadPhotosShort": "Max {max} photos",
     "dragDrop": "Glissez-déposez ou utilisez les boutons ci-dessous",
     "dragDropShort": "Glissez-déposez",
     "takePhoto": "Prendre une photo",
@@ -45,7 +46,7 @@
     "maxPhotosReached": "Maximum de 20 photos atteint.",
     "aiError": "Une erreur est survenue côté IA.",
     "aiErrorHint": "Réessayez dans un instant ou vérifiez votre connexion.",
-    "aiErrorFull": "Une erreur est survenue côté IA. Réessayez dans un instant ou vérifiez votre connexion."
+    "aiErrorFull": "Erreur IA. Réessayez ou vérifiez la connexion."
   },
   "condition": {
     "New": "Neuf",

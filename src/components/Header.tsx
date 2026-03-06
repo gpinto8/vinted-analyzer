@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Logo } from "./Logo";
 import { MaterialIcon } from "./MaterialIcon";
+import { Skeleton } from "./Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { Locale } from "@/contexts/LanguageContext";
 
@@ -48,7 +49,7 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
   const [langDropdownPosition, setLangDropdownPosition] = useState({ top: 0, left: 0 });
   const langButtonRef = useRef<HTMLButtonElement>(null);
   const langListRef = useRef<HTMLUListElement>(null);
-  const { t, locale, setLocale } = useLanguage();
+  const { t, locale, setLocale, isLoading } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -89,30 +90,42 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
         <button
           type="button"
           onClick={scrollToTop}
-          className="flex items-center gap-2 rounded-md border-0 bg-transparent p-0 transition-opacity hover:opacity-80 focus:outline-none focus:ring-0"
+          className="flex items-center gap-2 rounded-md border-0 bg-transparent p-0 focus:outline-none focus:ring-0"
           aria-label="Scroll to top"
         >
           <Logo className="h-8 w-8 shrink-0" />
-          <h1 className="text-xl font-bold tracking-tight text-primary" style={{ color: "#007780" }}>Vinted Analyzer</h1>
+          <h1 className="text-xl font-bold tracking-tight text-primary transition-opacity hover:opacity-80" style={{ color: "#007780" }}>Vinted Analyzer</h1>
         </button>
 
         <nav className="hidden items-center gap-2 md:flex">
-          <button
-            type="button"
-            onClick={onHowItWorksClick}
-            className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-500 dark:text-slate-300 dark:hover:text-slate-200"
-          >
-            {t("header.howItWorks")}
-          </button>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-0 active:bg-transparent dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            <MaterialIcon name={isDark ? "light_mode" : "dark_mode"} className="text-2xl" />
-          </button>
+          {isLoading ? (
+            <Skeleton className="h-4 w-24 rounded" aria-hidden />
+          ) : (
+            <button
+              type="button"
+              onClick={onHowItWorksClick}
+              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-500 dark:text-slate-300 dark:hover:text-slate-200"
+            >
+              {t("header.howItWorks")}
+            </button>
+          )}
+          {isLoading ? (
+            <Skeleton className="size-9 rounded-lg" aria-hidden />
+          ) : (
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-0 active:bg-transparent dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              <MaterialIcon name={isDark ? "light_mode" : "dark_mode"} className="text-2xl" />
+            </button>
+          )}
           <div className="relative">
+            {isLoading ? (
+              <Skeleton className="size-9 rounded-lg" aria-hidden />
+            ) : (
+              <>
             <button
               ref={langButtonRef}
               type="button"
@@ -133,7 +146,7 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
                   className="fixed z-[100] min-w-[140px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-600 dark:bg-slate-800"
                   style={
                     menuOpen
-                      ? { top: 112, left: 16 }
+                      ? { top: 112, right: 16, left: "auto" }
                       : { top: langDropdownPosition.top, left: langDropdownPosition.left }
                   }
                 >
@@ -151,28 +164,34 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
                             : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
                         }`}
                       >
-                        {t(loc.labelKey)}
+                        {isLoading ? <Skeleton className="h-4 w-16 rounded" aria-hidden /> : t(loc.labelKey)}
                       </button>
                     </li>
                   ))}
                 </ul>,
                 document.body
               )}
+              </>
+            )}
           </div>
-          <button
-            type="button"
-            onClick={onSignInClick}
-            className="rounded-lg bg-[#007780] px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#006269]"
-          >
-            {t("header.signIn")}
-          </button>
+          {isLoading ? (
+            <Skeleton className="h-9 w-20 rounded-lg" aria-hidden />
+          ) : (
+            <button
+              type="button"
+              onClick={onSignInClick}
+              className="rounded-lg bg-[#007780] px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#006269]"
+            >
+              {t("header.signIn")}
+            </button>
+          )}
         </nav>
 
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
           className="flex size-10 items-center justify-center rounded-md border-0 bg-transparent text-slate-700 transition-colors focus:outline-none focus:ring-0 active:bg-transparent dark:text-slate-300 md:hidden"
-          aria-label={menuOpen ? t("header.closeMenu") : t("header.openMenu")}
+          aria-label={menuOpen ? (isLoading ? "Close menu" : t("header.closeMenu")) : isLoading ? "Open menu" : t("header.openMenu")}
           aria-expanded={menuOpen}
         >
           <MaterialIcon name={menuOpen ? "close" : "menu"} className="text-3xl" />
@@ -190,10 +209,35 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
             }}
           />
           <nav
-            className="absolute left-0 right-0 z-50 flex w-full flex-row items-start justify-between gap-4 bg-white px-4 py-3 dark:bg-slate-900 md:hidden"
+            className="absolute left-0 right-0 z-50 flex w-full flex-row items-start justify-between gap-4 bg-white px-4 py-3 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.08),0_2px_4px_-2px_rgba(0,0,0,0.06)] dark:bg-slate-900 dark:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.2),0_2px_4px_-2px_rgba(0,0,0,0.15)] md:hidden"
             role="dialog"
             aria-label="Mobile menu"
           >
+            <div className="flex flex-col items-start gap-2">
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-4 w-24 rounded" aria-hidden />
+                  <Skeleton className="h-9 w-20 rounded-lg" aria-hidden />
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleHowItWorks}
+                    className="w-fit border-0 bg-transparent py-2 text-left text-sm font-medium text-slate-600 transition-colors hover:text-slate-500 focus:outline-none focus:ring-0 dark:text-slate-300 dark:hover:text-slate-200"
+                  >
+                    {t("header.howItWorks")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSignIn}
+                    className="w-fit rounded-lg border-0 bg-[#007780] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#006269] focus:outline-none focus:ring-0"
+                  >
+                    {t("header.signIn")}
+                  </button>
+                </>
+              )}
+            </div>
             <div className="relative flex flex-row items-center gap-1">
               <button
                 type="button"
@@ -207,27 +251,11 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
                 type="button"
                 onClick={() => setLangOpen((o) => !o)}
                 className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-0 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
-                aria-label={t("header.language")}
+                aria-label={isLoading ? "Language" : t("header.language")}
                 aria-expanded={langOpen}
                 aria-haspopup="listbox"
               >
                 <MaterialIcon name="language" className="text-2xl" />
-              </button>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <button
-                type="button"
-                onClick={handleHowItWorks}
-                className="w-fit border-0 bg-transparent py-2 text-right text-sm font-medium text-slate-600 transition-colors hover:text-slate-500 focus:outline-none focus:ring-0 dark:text-slate-300 dark:hover:text-slate-200"
-              >
-                {t("header.howItWorks")}
-              </button>
-              <button
-                type="button"
-                onClick={handleSignIn}
-                className="w-fit rounded-lg border-0 bg-[#007780] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#006269] focus:outline-none focus:ring-0"
-              >
-                {t("header.signIn")}
               </button>
             </div>
           </nav>
