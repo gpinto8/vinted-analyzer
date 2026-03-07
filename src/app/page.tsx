@@ -78,6 +78,32 @@ export default function Home() {
     });
   }, []);
 
+  const fetchVerifiedRetail = useCallback(async (listing: ListingResult) => {
+    try {
+      const res = await fetch("/api/ebay-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          brand: listing.brand ?? "",
+          productType: listing.productType ?? "",
+          title: listing.title ?? "",
+        }),
+      });
+      if (!res.ok) return;
+      const data = await res.json() as { verified: ListingResult["verifiedRetail"] | null };
+      if (data.verified) {
+        setResult((prev) => {
+          if (!prev) return null;
+          const next = { ...prev, verifiedRetail: data.verified ?? undefined };
+          saveLastResult(next, lastRequestRef.current ?? undefined);
+          return next;
+        });
+      }
+    } catch {
+      // Silently skip verified retail on error
+    }
+  }, []);
+
   const handleResult = useCallback(
     (newResult: ListingResult, request?: AnalyzeRequest) => {
       if (isEmptyResult(newResult)) {
@@ -89,8 +115,9 @@ export default function Home() {
       if (request) lastRequestRef.current = request;
       if (request?.productType) setDraftProductType(request.productType);
       if (request?.brand) setDraftBrand(request.brand);
+      fetchVerifiedRetail(newResult);
     },
-    [isEmptyResult]
+    [isEmptyResult, fetchVerifiedRetail]
   );
 
   useEffect(() => {
@@ -249,7 +276,7 @@ export default function Home() {
                       )}
                     </div>
                     <span className="rounded-md bg-[#007780] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                      {t("home.aiGenerated")}
+                      {t("home.aiEstimated")}
                     </span>
                   </div>
                 ) : (

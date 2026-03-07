@@ -30,8 +30,8 @@ export function MeasurementsCard({ measurements }: { measurements: Record<string
   };
 
   return (
-    <div className="relative flex min-h-[3.25rem] min-w-0 flex-1 flex-col resize-y overflow-hidden rounded-lg border border-gray-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
-      <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto pb-5">
+    <div className="relative flex min-h-[3.25rem] min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white px-3 py-2.5 lg:max-h-[8.5rem] lg:resize-y dark:border-slate-700 dark:bg-slate-800">
+      <div className="scrollbar-thin min-h-0 flex-1 lg:overflow-y-auto">
         <div className="flex flex-col gap-2">
           {entries.map(([name, value]) => {
             const isCopied = copiedKey === name;

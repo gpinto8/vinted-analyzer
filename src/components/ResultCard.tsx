@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { MeasurementsCard } from "./MeasurementsCard";
 import { EmptyResult } from "./EmptyResult";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getVerifyLinks } from "@/lib/verify-links";
+import { computeSellability, SELLABILITY_MAX } from "@/lib/sellability";
 import { CONDITION_OPTIONS } from "@/types/listing";
-import type { ListingResult } from "@/types/listing";
+import type { ListingResult, SellabilityBreakdown } from "@/types/listing";
 
 async function copyToClipboard(text: string): Promise<boolean> {
   try {
@@ -21,6 +22,89 @@ async function copyToClipboard(text: string): Promise<boolean> {
 const inputClassName =
   "min-w-0 flex-1 border-0 bg-transparent text-sm font-medium text-black outline-none focus:ring-0 dark:text-slate-200";
 
+function SourceBadge({ label, variant }: { label: string; variant: "ai" | "verified" }) {
+  const cls =
+    variant === "verified"
+      ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300"
+      : "border-slate-300 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400";
+  return (
+    <span className={`ml-auto inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${cls}`}>
+      {variant === "verified" && <MaterialIcon name="verified" className="text-xs" />}
+      {label}
+    </span>
+  );
+}
+
+function SellabilityTooltip({
+  breakdown,
+  open,
+  onClose,
+  anchorRef,
+}: {
+  breakdown: SellabilityBreakdown;
+  open: boolean;
+  onClose: () => void;
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
+}) {
+  const { t } = useLanguage();
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (
+        panelRef.current && !panelRef.current.contains(e.target as Node) &&
+        anchorRef.current && !anchorRef.current.contains(e.target as Node)
+      ) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open, onClose, anchorRef]);
+
+  if (!open) return null;
+
+  const rows: { key: keyof SellabilityBreakdown; label: string; max: number }[] = [
+    { key: "brandDemand", label: t("result.brandDemand"), max: SELLABILITY_MAX.brandDemand },
+    { key: "condition", label: t("result.conditionScore"), max: SELLABILITY_MAX.condition },
+    { key: "pricePositioning", label: t("result.pricePositioning"), max: SELLABILITY_MAX.pricePositioning },
+    { key: "categoryDemand", label: t("result.categoryDemand"), max: SELLABILITY_MAX.categoryDemand },
+    { key: "listingQuality", label: t("result.listingQuality"), max: SELLABILITY_MAX.listingQuality },
+  ];
+
+  return (
+    <div
+      ref={panelRef}
+      className="absolute right-0 top-full z-30 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800"
+    >
+      <h5 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {t("result.sellabilityBreakdown")}
+      </h5>
+      <div className="space-y-2.5">
+        {rows.map(({ key, label, max }) => {
+          const value = breakdown[key];
+          const pct = Math.round((value / max) * 100);
+          return (
+            <div key={key}>
+              <div className="mb-1 flex items-center justify-between text-xs">
+                <span className="font-medium text-slate-700 dark:text-slate-300">{label}</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">+{value}/{max}</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                <div
+                  className="h-full rounded-full bg-[#007780] transition-all duration-500"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function DetailRow({
   label,
   value,
@@ -32,6 +116,7 @@ function DetailRow({
   copyLabel,
   copiedLabel,
   inputType = "text",
+  badge,
 }: {
   label: string;
   value: string;
@@ -43,6 +128,7 @@ function DetailRow({
   copyLabel: string;
   copiedLabel: string;
   inputType?: "text" | "number";
+  badge?: React.ReactNode;
 }) {
   const isEditable = !disabled && onChange != null;
   const isEmpty = value === "" || value === undefined;
@@ -73,6 +159,7 @@ function DetailRow({
         ) : (
           <p className="min-w-0 flex-1 text-sm font-medium text-black dark:text-slate-200">{displayValue}</p>
         )}
+        {badge}
         {!disabled && onCopy && (value != null && String(value).trim() !== "") && (
           <button
             type="button"
@@ -107,6 +194,16 @@ export function ResultCard({
   const [copiedMaterial, setCopiedMaterial] = useState(false);
   const [copiedPriceNew, setCopiedPriceNew] = useState(false);
   const [copiedPrice, setCopiedPrice] = useState(false);
+  const [sellabilityOpen, setSellabilityOpen] = useState(false);
+  const sellabilityBtnRef = useRef<HTMLButtonElement>(null);
+
+  const toggleSellability = useCallback(() => setSellabilityOpen((p) => !p), []);
+  const closeSellability = useCallback(() => setSellabilityOpen(false), []);
+
+  const { score: sellabilityScore, breakdown: sellabilityBreakdown } = useMemo(
+    () => computeSellability(data),
+    [data],
+  );
 
   const copy = (text: string, setter: (v: boolean) => void) => {
     return async () => {
@@ -138,6 +235,12 @@ export function ResultCard({
   const description = data.description ?? "";
   const isEmptyResult = !title.trim() && !description.trim();
   const isEditable = onChange != null;
+
+  const hasVerified = data.verifiedRetail != null;
+  const aiBadgeLabel = t("result.aiEstimatedBadge");
+  const verifiedBadgeLabel = hasVerified
+    ? t("result.verifiedBadge").replace("{source}", data.verifiedRetail!.source.name)
+    : "";
 
   if (isEmptyResult) {
     return (
@@ -341,6 +444,33 @@ export function ResultCard({
               inputType="number"
             />
           )}
+
+          {hasVerified && (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+              <h4 className="text-sm font-bold text-black dark:text-slate-200 sm:w-28 sm:shrink-0 sm:pt-2.5">
+                {t("result.verifiedRetailPrice")}
+              </h4>
+              <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/50 px-3 py-2.5 dark:border-emerald-700/50 dark:bg-emerald-950/20">
+                <p className="min-w-0 flex-1 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                  {data.verifiedRetail!.currency === "EUR" ? "€" : data.verifiedRetail!.currency}{" "}
+                  {data.verifiedRetail!.price.toFixed(2)}
+                </p>
+                <SourceBadge label={verifiedBadgeLabel} variant="verified" />
+                <a
+                  href={data.verifiedRetail!.source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex shrink-0 items-center gap-1 text-xs font-bold text-[#007780] transition-colors hover:text-[#006269] dark:hover:text-[#0099a3]"
+                >
+                  <MaterialIcon name="open_in_new" className="text-sm" />
+                  <span className="hidden sm:inline">
+                    {t("result.viewOnSource").replace("{source}", data.verifiedRetail!.source.name)}
+                  </span>
+                </a>
+              </div>
+            </div>
+          )}
+
           {(isEditable || (data.priceSuggested != null && data.priceSuggested > 0)) && (
             <DetailRow
               label={t("result.suggestedPrice")}
@@ -364,6 +494,55 @@ export function ResultCard({
               inputType="number"
             />
           )}
+
+          {/* Sellability score */}
+          <div className="relative flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <h4 className="text-sm font-bold text-black dark:text-slate-200 sm:w-28 sm:shrink-0">
+              {t("result.sellability")}
+            </h4>
+            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <span
+                  className={`text-lg font-extrabold ${
+                    sellabilityScore >= 65
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : sellabilityScore >= 35
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-red-600 dark:text-red-400"
+                  }`}
+                >
+                  {sellabilityScore}%
+                </span>
+                <div className="hidden h-2 flex-1 overflow-hidden rounded-full bg-slate-200 sm:block dark:bg-slate-700">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${
+                      sellabilityScore >= 65
+                        ? "bg-emerald-500"
+                        : sellabilityScore >= 35
+                          ? "bg-amber-500"
+                          : "bg-red-500"
+                    }`}
+                    style={{ width: `${sellabilityScore}%` }}
+                  />
+                </div>
+              </div>
+              <button
+                ref={sellabilityBtnRef}
+                type="button"
+                onClick={toggleSellability}
+                className="shrink-0 rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                aria-label={t("result.sellabilityBreakdown")}
+              >
+                <MaterialIcon name="info" className="text-lg" />
+              </button>
+            </div>
+            <SellabilityTooltip
+              breakdown={sellabilityBreakdown}
+              open={sellabilityOpen}
+              onClose={closeSellability}
+              anchorRef={sellabilityBtnRef}
+            />
+          </div>
         </div>
       )}
 
@@ -388,7 +567,7 @@ export function ResultCard({
         </div>
       )}
 
-      {!isEmptyResult && verifyLinks.length > 0 && (
+      {!isEmptyResult && data.verifiedRetail && verifyLinks.length > 0 && (
         <div className="space-y-2 border-t border-gray-200 pt-7 dark:border-slate-700">
           <h4 className="text-sm font-bold text-black dark:text-slate-200">{t("result.verifyListing")}</h4>
           <p className="text-xs text-slate-600 dark:text-slate-400">{t("result.verifySitesHint")}</p>

@@ -10,6 +10,23 @@ export const CONDITION_OPTIONS = [
 
 export type ConditionOption = (typeof CONDITION_OPTIONS)[number];
 
+export interface VerifiedResult {
+  source: { name: string; url: string };
+  price: number;
+  currency: string;
+  productName?: string;
+  brand?: string;
+  fetchedAt: string;
+}
+
+export interface SellabilityBreakdown {
+  brandDemand: number;
+  condition: number;
+  pricePositioning: number;
+  categoryDemand: number;
+  listingQuality: number;
+}
+
 export interface ListingResult {
   title?: string;
   description?: string;
@@ -28,6 +45,9 @@ export interface ListingResult {
   priceSuggested?: number;
   /** Optional sources/websites the API used or where the user can verify the listing (e.g. e-commerce links). */
   sources?: { name: string; url: string }[];
+  verifiedRetail?: VerifiedResult;
+  sellabilityScore?: number;
+  sellabilityBreakdown?: SellabilityBreakdown;
 }
 
 /** Payload sent to the analyze API; used to re-run analysis (e.g. on locale change). */

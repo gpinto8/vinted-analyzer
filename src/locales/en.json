@@ -18,7 +18,7 @@
     "subtitle": "Upload your photos and our AI will generate professional, SEO-friendly titles, descriptions, and suggested prices for your Vinted listings.",
     "inputDetails": "Input Details",
     "optimizedResult": "Optimized Result",
-    "aiGenerated": "AI Generated",
+    "aiEstimated": "AI Estimated",
     "recoverLastResult": "Recover last result",
     "updatingLanguage": "Updating…"
   },
@@ -82,7 +82,18 @@
     "findProductLinksError": "Could not load links. Try again.",
     "noAnalysisYet": "No analysis yet",
     "emptyResultHint": "Upload photos and provide basic details to see your optimized Vinted listing here.",
-    "notClothingHint": "Image doesn't appear to be clothing or a sellable item. Try uploading photos of the item you want to list."
+    "notClothingHint": "Image doesn't appear to be clothing or a sellable item. Try uploading photos of the item you want to list.",
+    "verifiedRetailPrice": "Retail price (verified)",
+    "verifiedBadge": "Verified ({source})",
+    "aiEstimatedBadge": "AI Estimated",
+    "viewOnSource": "View on {source}",
+    "sellability": "Sellability",
+    "sellabilityBreakdown": "Sellability breakdown",
+    "brandDemand": "Brand demand",
+    "conditionScore": "Condition",
+    "pricePositioning": "Price positioning",
+    "categoryDemand": "Category demand",
+    "listingQuality": "Listing quality"
   },
   "empty": {
     "noAnalysisYet": "No analysis yet",
@@ -112,7 +123,7 @@
   },
   "footer": {
     "loveShopping": "Love shopping?",
-    "showLove": "Show me some love on my Vinted",
+    "showLove": "Check out my Vinted",
     "copyright": "Vinted Analyzer. Not affiliated with Vinted Ltd."
   },
   "nav": {
