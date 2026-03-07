@@ -20,9 +20,9 @@ export function buildAnalysisPrompt(input: AnalyzeListingInput): string {
   const language = LOCALE_LABEL[locale];
 
   return [
-    "You are an expert fashion marketplace assistant specializing in secondhand clothing listings for Vinted, Wallapop, and similar platforms.",
+    "You are a top-performing Vinted seller and SEO specialist for secondhand fashion marketplaces (Vinted, Wallapop, Depop). Your listings consistently rank #1 in search results and convert at 3x the average rate.",
     "",
-    "Analyze these clothing photos carefully and generate a complete, professional listing.",
+    "Analyze these clothing photos and generate a listing engineered to SELL.",
     "",
     "=== SELLER INPUT ===",
     `- Condition: ${condition}`,
@@ -31,27 +31,57 @@ export function buildAnalysisPrompt(input: AnalyzeListingInput): string {
     "",
     "=== INSTRUCTIONS ===",
     "",
-    '1. TITLE: Write a catchy, SEO-optimized listing title (max 80 chars). Include brand, item type, key feature (color/pattern), and size if visible. Example: "Bershka Basic Black T-Shirt Size M"',
+    "1. TITLE (max 80 chars):",
+    "   Structure: [Brand] [Differentiator?] [Specific Garment Type] [Color/Pattern] [Size]",
+    '   - LEAD with the brand name (most-searched keyword on Vinted)',
+    "   - Use the SPECIFIC garment type buyers search for (not generic 'top' — use 'oversized hoodie', 'slim fit chinos', 'crop cardigan', etc.)",
+    "   - Add the dominant color or pattern (e.g. 'navy blue', 'plaid', 'striped')",
+    "   - End with size (e.g. 'Size M', 'EU 42')",
+    "   - Add ONE truthful differentiator if applicable: vintage, Y2K, limited edition, deadstock, streetwear, gorpcore, minimalist, archive",
+    "   - No emojis, no ALL CAPS, no special symbols",
+    "   - Think: what would a buyer TYPE in the Vinted search bar to find this exact item?",
+    '   - Example: "Nike Vintage Oversized Hoodie Grey Size L"',
     "",
-    "2. DESCRIPTION: Write a compelling 4-6 line description in paragraphs. Include: what the item is (type, brand), material and fabric (from visual cues), color and pattern, condition matching the seller's stated condition, and a closing line on why it's a good buy. No emojis. Professional tone.",
+    "2. DESCRIPTION (5-8 lines, paragraph-based, use \\n between paragraphs):",
+    "   Paragraph 1 — HOOK: One compelling line stating what the item is and why it's desirable.",
+    '     Example: "Hard-to-find Nike ACG fleece in excellent condition — perfect for layering."',
+    "   Paragraph 2 — FEATURES: Detailed fabric/material feel, fit description (oversized/slim/regular/relaxed), accurate color, notable details (zip type, logo placement, pockets, embroidery, stitching).",
+    "   Paragraph 3 — CONDITION: Honest description matching the seller's stated condition. If below 'Like new', mention any visible wear honestly — buyers trust transparent sellers.",
+    "   Paragraph 4 — SIZE & FIT: Size guidance with fit advice (e.g. 'Tagged M, fits true to size. Works for a relaxed look on S.').",
+    "   Final line — CTA: Warm closing (e.g. 'Message me for more details or bundle discounts!').",
+    "   Rules: NO emojis. Professional but warm/conversational tone. Naturally weave in searchable keywords (brand name, garment type, style, 'secondhand') without keyword-stuffing.",
     "",
-    '3. CATEGORY: Marketplace-style category path (e.g. "Men > T-shirts", "Women > Dresses > Mini dresses").',
+    '3. CATEGORY: Marketplace category path (e.g. "Men > T-shirts", "Women > Dresses > Mini dresses").',
     "",
-    "4. BRAND: Identify from labels, logos, tags. If the seller gave a brand hint, cross-check with what you see. If unidentifiable, use the hint or empty string.",
+    "4. BRAND: Identify from labels, logos, tags visible in the photos. Cross-check with seller hint. Use hint or empty string if unidentifiable.",
     "",
-    "5. SIZE: From tags/labels if visible. Use XS/S/M/L/XL/XXL or numeric (36, 38, 40, 42). If not visible, estimate from proportions.",
+    "5. SIZE: Read from tags/labels. Use XS/S/M/L/XL/XXL or numeric (36, 38, 40, 42). Estimate from proportions if not visible.",
     "",
-    '6. COLOR: Primary color (e.g. "Dark grey", "Navy blue", "Cream").',
+    '6. COLOR: Primary color as buyers search it (e.g. "Dark grey", "Navy blue", "Cream", "Burgundy").',
     "",
-    '7. MATERIAL: Fabric from visual texture or care label. Otherwise estimate (e.g. "100% Cotton", "Cotton blend").',
+    '7. MATERIAL: From care label or visual texture. Be specific (e.g. "100% Cotton", "80% Cotton 20% Polyester", "Wool blend").',
     "",
-    '8. MEASUREMENTS: Realistic measurements in cm by garment type and estimated size. Tops: Chest, Length, Sleeve. Bottoms: Waist, Inseam, Length. Dresses: Bust, Waist, Length. If you cannot estimate, use "Not measured".',
+    "8. MEASUREMENTS: Return as a JSON object with measurement names as keys and cm values as numbers (no units in values).",
+    "   By garment type:",
+    "   - Tops (t-shirts, shirts, hoodies, sweaters, jackets): Chest, Length, Shoulder, Sleeve",
+    "   - Bottoms (pants, jeans, shorts, skirts): Waist, Hips, Inseam, Length",
+    "   - Dresses/Jumpsuits: Bust, Waist, Hips, Length",
+    "   - Outerwear (coats, jackets): Chest, Length, Shoulder, Sleeve",
+    "   Estimate realistic measurements based on the detected size using standard sizing charts for that brand tier.",
+    '   Example for a Size M hoodie: { "Chest": 56, "Length": 70, "Shoulder": 48, "Sleeve": 64 }',
+    "   If you truly cannot estimate, return an empty object {}.",
     "",
-    '9. TAGS: 5-8 search keywords (e.g. ["bershka", "tshirt", "black", "casual", "cotton"]).',
+    '9. TAGS: 5-8 lowercase search keywords buyers would use (e.g. ["nike", "hoodie", "vintage", "grey", "streetwear", "oversized", "cotton"]).',
     "",
-    "10. PRICING (numbers only):",
-    "    - priceNew: Estimated retail price in EUR when new (typical for this brand and item).",
-    "    - priceSuggested: Resale price in EUR by condition: New 70-85%, Like new 55-70%, Very good 40-55%, Good 30-45%, Fair 20-35%, Used 15-25% of retail.",
+    "10. PRICING (numbers only, in EUR):",
+    "    - priceNew: Estimated original retail price. Consider the brand tier:",
+    "      Luxury (Gucci, Prada, etc.): use actual retail ranges.",
+    "      Premium (Nike, Adidas, The North Face, etc.): typically 40-120 EUR.",
+    "      Mid-range (Zara, Massimo Dutti, COS): typically 20-80 EUR.",
+    "      Fast-fashion (Bershka, Primark, H&M): typically 8-35 EUR.",
+    "    - priceSuggested: Competitive resale price factoring brand demand, condition, and secondhand market reality:",
+    "      New: 65-80% of retail. Like new: 50-65%. Very good: 35-50%. Good: 25-40%. Fair: 15-30%. Used: 10-20%.",
+    "      For high-demand brands (Nike, Carhartt, Stussy, etc.) use the upper end. For fast-fashion use the lower end.",
     "",
     "=== OUTPUT ===",
     "",
@@ -66,13 +96,13 @@ export function buildAnalysisPrompt(input: AnalyzeListingInput): string {
     '  "color": "string",',
     '  "material": "string",',
     `  "condition": "${condition}",`,
-    '  "measurements": "string",',
+    '  "measurements": { "MeasurementName": number },',
     '  "tags": ["string"],',
     '  "priceNew": number,',
     '  "priceSuggested": number',
     "}",
     "",
-    `priceNew and priceSuggested must be numbers (e.g. 29.99). Write all text in ${language}.`,
+    `priceNew and priceSuggested must be plain numbers (e.g. 29.99). measurements must be a JSON object (not a string). Write all text in ${language}.`,
   ].join("\n");
 }
 
@@ -98,6 +128,34 @@ export function parseListingJson(raw: string): Record<string, unknown> {
 
 import type { ListingResult } from "@/types/listing";
 
+function parseMeasurements(raw: unknown): Record<string, number> | undefined {
+  if (raw != null && typeof raw === "object" && !Array.isArray(raw)) {
+    const obj = raw as Record<string, unknown>;
+    const result: Record<string, number> = {};
+    for (const [key, val] of Object.entries(obj)) {
+      const num = typeof val === "number" ? val : parseFloat(String(val));
+      if (Number.isFinite(num) && num > 0) result[key] = Math.round(num);
+    }
+    return Object.keys(result).length > 0 ? result : undefined;
+  }
+
+  if (typeof raw === "string" && raw.trim()) {
+    const result: Record<string, number> = {};
+    const pairs = raw.split(/[,;]+/);
+    for (const pair of pairs) {
+      const match = pair.match(/([A-Za-z\s]+)\s*[:\-]\s*(\d+(?:\.\d+)?)/);
+      if (match) {
+        const name = match[1].trim();
+        const val = parseFloat(match[2]);
+        if (name && Number.isFinite(val) && val > 0) result[name] = Math.round(val);
+      }
+    }
+    return Object.keys(result).length > 0 ? result : undefined;
+  }
+
+  return undefined;
+}
+
 export function mapToListingResult(data: Record<string, unknown>): ListingResult {
   return {
     title: String(data.title ?? data.titolo ?? "").trim() || undefined,
@@ -108,7 +166,7 @@ export function mapToListingResult(data: Record<string, unknown>): ListingResult
     color: String(data.color ?? data.colore ?? "").trim() || undefined,
     material: String(data.material ?? data.materiale ?? "").trim() || undefined,
     condition: String(data.condition ?? data.condizione ?? "").trim() || undefined,
-    measurements: String(data.measurements ?? data.misure ?? "").trim() || undefined,
+    measurements: parseMeasurements(data.measurements ?? data.misure),
     tags: Array.isArray(data.tags ?? data.tag) ? ((data.tags ?? data.tag) as string[]) : undefined,
     priceNew: extractPrice(data.priceNew ?? data.prezzo_nuovo ?? data.price_new),
     priceSuggested: extractPrice(data.priceSuggested ?? data.prezzo_vinted ?? data.price_suggested),

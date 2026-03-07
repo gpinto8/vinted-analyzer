@@ -254,11 +254,9 @@ export function ListingForm({
   }
 
   const handleTakePhotoClick = useCallback(() => {
-    const useCameraModal =
-      typeof window !== "undefined" &&
-      window.matchMedia("(min-width: 768px)").matches &&
-      navigator.mediaDevices?.getUserMedia;
-    if (useCameraModal) {
+    const hasUserMedia =
+      typeof window !== "undefined" && !!navigator.mediaDevices?.getUserMedia;
+    if (hasUserMedia) {
       setShowCameraModal(true);
     } else {
       cameraInputRef.current?.click();
@@ -411,10 +409,10 @@ export function ListingForm({
                       e.stopPropagation();
                       removeFile(i);
                     }}
-                    className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 p-0 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
+                    className="flex size-5 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 p-0 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-6"
                     aria-label={`Remove ${f.name}`}
                   >
-                    <svg className="m-auto block size-3 shrink-0 sm:size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
+                    <svg className="m-auto block size-3.5 shrink-0 sm:size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
@@ -424,10 +422,10 @@ export function ListingForm({
                       e.stopPropagation();
                       downloadFile(f, i);
                     }}
-                    className="flex size-4 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 p-0 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-5"
+                    className="flex size-5 shrink-0 items-center justify-center rounded-full border-0 bg-black/40 p-0 text-white opacity-90 transition-opacity hover:bg-black/60 hover:opacity-100 focus:outline-none focus:ring-0 sm:size-6"
                     aria-label={`Download ${f.name}`}
                   >
-                    <svg className="m-auto block size-3 shrink-0 sm:size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
+                    <svg className="m-auto block size-3.5 shrink-0 sm:size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" preserveAspectRatio="xMidYMid meet" aria-hidden>
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                       <polyline points="7 10 12 15 17 10" />
                       <line x1="12" y1="15" x2="12" y2="3" />

@@ -64,6 +64,8 @@
     "brand": "Brand",
     "size": "Size",
     "measurements": "Measurements (cm)",
+    "measurementsTitle": "Measurements (cm)",
+    "copyAll": "Copy all",
     "condition": "Condition",
     "color": "Color",
     "retailPrice": "Retail price",

@@ -106,14 +106,13 @@ export default function Home() {
     };
   }, [analyzeErrorToast, startAnalyzeErrorToastTimer]);
 
-  const hadResultRef = useRef(false);
   useEffect(() => {
-    if (result && !hadResultRef.current) {
-      hadResultRef.current = true;
+    if (!result || isEmptyResult(result)) return;
+    const timer = setTimeout(() => {
       document.getElementById(OPTIMIZED_RESULT_ID)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-    if (!result) hadResultRef.current = false;
-  }, [result]);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [result, isEmptyResult]);
 
   const prevLocaleRef = useRef(locale);
   useEffect(() => {

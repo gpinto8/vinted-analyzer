@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { MaterialIcon } from "./MaterialIcon";
+import { MeasurementsCard } from "./MeasurementsCard";
 import { EmptyResult } from "./EmptyResult";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getVerifyLinks } from "@/lib/verify-links";
@@ -68,7 +69,6 @@ export function ResultCard({ data }: { data: ListingResult }) {
   const [copiedProductType, setCopiedProductType] = useState(false);
   const [copiedBrand, setCopiedBrand] = useState(false);
   const [copiedSize, setCopiedSize] = useState(false);
-  const [copiedMeasurements, setCopiedMeasurements] = useState(false);
   const [copiedColor, setCopiedColor] = useState(false);
   const [copiedMaterial, setCopiedMaterial] = useState(false);
   const [copiedPriceNew, setCopiedPriceNew] = useState(false);
@@ -89,7 +89,6 @@ export function ResultCard({ data }: { data: ListingResult }) {
   const handleCopyProductType = copy(data.productType ?? "", setCopiedProductType);
   const handleCopyBrand = copy(data.brand ?? "", setCopiedBrand);
   const handleCopySize = copy(data.size ?? "", setCopiedSize);
-  const handleCopyMeasurements = copy(data.measurements ?? "", setCopiedMeasurements);
   const handleCopyColor = copy(data.color ?? "", setCopiedColor);
   const handleCopyMaterial = copy(data.material ?? "", setCopiedMaterial);
   const handleCopyPriceNew = copy(
@@ -157,7 +156,7 @@ export function ResultCard({ data }: { data: ListingResult }) {
           </div>
         </div>
       </div>
-      {(data.productType ?? data.category ?? data.brand ?? data.size ?? data.measurements ?? data.condition ?? data.color ?? ((data.priceNew != null && data.priceNew > 0) || (data.priceSuggested != null && data.priceSuggested > 0))) && (
+      {(data.productType ?? data.category ?? data.brand ?? data.size ?? (data.measurements && Object.keys(data.measurements).length > 0) ?? data.condition ?? data.color ?? ((data.priceNew != null && data.priceNew > 0) || (data.priceSuggested != null && data.priceSuggested > 0))) && (
         <div className="space-y-4 border-t border-gray-200 pt-6 pb-6 dark:border-slate-700">
           {data.productType && (
             <DetailRow
@@ -193,15 +192,8 @@ export function ResultCard({ data }: { data: ListingResult }) {
             copyLabel={t("result.copy")}
             copiedLabel={t("result.copied")}
           />
-          {data.measurements && (
-            <DetailRow
-              label={t("result.measurements")}
-              value={data.measurements}
-              onCopy={handleCopyMeasurements}
-              copied={copiedMeasurements}
-              copyLabel={t("result.copy")}
-              copiedLabel={t("result.copied")}
-            />
+          {data.measurements && Object.keys(data.measurements).length > 0 && (
+            <MeasurementsCard measurements={data.measurements} />
           )}
           {data.condition && (
             <DetailRow

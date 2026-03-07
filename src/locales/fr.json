@@ -64,6 +64,8 @@
     "brand": "Marque",
     "size": "Taille",
     "measurements": "Mensurations (cm)",
+    "measurementsTitle": "Mensurations (cm)",
+    "copyAll": "Tout copier",
     "condition": "État",
     "color": "Couleur",
     "retailPrice": "Prix neuf",

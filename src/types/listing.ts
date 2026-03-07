@@ -22,7 +22,7 @@ export interface ListingResult {
   color?: string;
   material?: string;
   condition?: string;
-  measurements?: string;
+  measurements?: Record<string, number>;
   tags?: string[];
   priceNew?: number;
   priceSuggested?: number;
