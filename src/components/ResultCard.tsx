@@ -236,7 +236,11 @@ export function ResultCard({
   const isEmptyResult = !title.trim() && !description.trim();
   const isEditable = onChange != null;
 
-  const hasVerified = data.verifiedRetail != null;
+  const hasValidVerifiedUrl =
+    data.verifiedRetail != null &&
+    typeof data.verifiedRetail.source?.url === "string" &&
+    /^https?:\/\/.+/.test(data.verifiedRetail.source.url.trim());
+  const hasVerified = hasValidVerifiedUrl;
   const aiBadgeLabel = t("result.aiEstimatedBadge");
   const verifiedBadgeLabel = hasVerified
     ? t("result.verifiedBadge").replace("{source}", data.verifiedRetail!.source.name)
