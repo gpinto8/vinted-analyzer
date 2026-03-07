@@ -6,6 +6,7 @@ import { Logo } from "./Logo";
 import { MaterialIcon } from "./MaterialIcon";
 import { Skeleton } from "./Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import type { Locale } from "@/contexts/LanguageContext";
 
 const THEME_KEY = "theme";
@@ -51,6 +52,7 @@ export function Header({ onFeedbackClick, onHowItWorksClick }: HeaderProps) {
   const langListRef = useRef<HTMLUListElement>(null);
   const { t, locale, setLocale, isLoading } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
+  useLockBodyScroll(menuOpen);
 
   useEffect(() => {
     if (langOpen && langButtonRef.current) {
@@ -242,7 +244,10 @@ export function Header({ onFeedbackClick, onHowItWorksClick }: HeaderProps) {
             <div className="relative flex flex-row items-center gap-1">
               <button
                 type="button"
-                onClick={toggleTheme}
+                onClick={() => {
+                  toggleTheme();
+                  setMenuOpen(false);
+                }}
                 className="flex size-9 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus:ring-0 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100"
                 aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               >

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 
 interface HowItWorksModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const STEP_KEYS = [
 
 export function HowItWorksModal({ isOpen, onClose }: HowItWorksModalProps) {
   const { t } = useLanguage();
+  useLockBodyScroll(isOpen);
   useEffect(() => {
     if (!isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {

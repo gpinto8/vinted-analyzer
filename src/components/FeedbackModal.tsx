@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 
 const FEATURE_KEYS = [
   "feedback.featureLogin",
@@ -28,6 +29,8 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+
+  useLockBodyScroll(isOpen);
 
   const resetForm = useCallback(() => {
     setName("");

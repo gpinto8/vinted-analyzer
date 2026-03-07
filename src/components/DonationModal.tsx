@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 
 const DEFAULT_PRESETS = [1, 2, 5, 10];
 const MIN_CUSTOM = 0.5;
@@ -32,6 +33,8 @@ export function DonationModal({ isOpen, onClose }: DonationModalProps) {
     cancelPayment();
     onClose();
   };
+
+  useLockBodyScroll(isOpen);
 
   useEffect(() => {
     if (!isOpen) return;

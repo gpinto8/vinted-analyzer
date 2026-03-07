@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MaterialIcon } from "./MaterialIcon";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 
 interface CameraCaptureModalProps {
   isOpen: boolean;
@@ -14,6 +15,8 @@ export function CameraCaptureModal({ isOpen, onClose, onCapture }: CameraCapture
   const streamRef = useRef<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [streamReady, setStreamReady] = useState(false);
+
+  useLockBodyScroll(isOpen);
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());

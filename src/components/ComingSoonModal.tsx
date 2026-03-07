@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { MaterialIcon } from "./MaterialIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 
 interface ComingSoonModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface ComingSoonModalProps {
 
 export function ComingSoonModal({ isOpen, onClose }: ComingSoonModalProps) {
   const { t } = useLanguage();
+  useLockBodyScroll(isOpen);
   useEffect(() => {
     if (!isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
