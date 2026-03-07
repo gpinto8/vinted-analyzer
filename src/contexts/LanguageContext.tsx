@@ -85,7 +85,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    setTranslationsReady(false);
     localeModules[locale]()
       .then((m) => {
         setTranslations(m.default);

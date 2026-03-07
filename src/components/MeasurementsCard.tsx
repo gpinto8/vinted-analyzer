@@ -13,70 +13,63 @@ async function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
-function formatMeasurementsText(measurements: Record<string, number>): string {
-  return Object.entries(measurements)
-    .map(([name, value]) => `${name}: ${value} cm`)
-    .join(", ");
-}
-
 const MAX_CM = 150;
 
 export function MeasurementsCard({ measurements }: { measurements: Record<string, number> }) {
   const { t } = useLanguage();
-  const [copied, setCopied] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const entries = Object.entries(measurements);
 
   if (entries.length === 0) return null;
 
-  const handleCopy = async () => {
-    if (await copyToClipboard(formatMeasurementsText(measurements))) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+  const handleCopyRow = async (name: string, value: number) => {
+    if (await copyToClipboard(String(value))) {
+      setCopiedKey(name);
+      setTimeout(() => setCopiedKey(null), 2000);
     }
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <MaterialIcon name="straighten" className="text-lg text-[#007780]" />
-          <h4 className="text-sm font-bold text-black dark:text-slate-200">
-            {t("result.measurementsTitle")}
-          </h4>
-        </div>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="flex items-center gap-1 text-xs font-bold text-[#007780] transition-colors hover:text-[#006269] dark:hover:text-[#0099a3]"
-        >
-          <MaterialIcon name="content_copy" className="text-sm" />
-          <span className="hidden sm:inline">
-            {copied ? t("result.copied") : t("result.copyAll")}
-          </span>
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {entries.map(([name, value]) => (
-          <div
-            key={name}
-            className="flex items-center gap-3 rounded-md bg-white px-3 py-2 dark:bg-slate-800"
-          >
-            <span className="min-w-[5rem] text-xs font-medium text-slate-600 dark:text-slate-400">
-              {name}
-            </span>
-            <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-slate-700">
+    <div className="relative flex min-h-[3.25rem] min-w-0 flex-1 flex-col resize-y overflow-hidden rounded-lg border border-gray-200 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-800">
+      <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto pb-5">
+        <div className="flex flex-col gap-2">
+          {entries.map(([name, value]) => {
+            const isCopied = copiedKey === name;
+            return (
               <div
-                className="absolute inset-y-0 left-0 rounded-full bg-[#007780]/40"
-                style={{ width: `${Math.min((value / MAX_CM) * 100, 100)}%` }}
-              />
-            </div>
-            <span className="min-w-[3.5rem] text-right text-xs font-semibold tabular-nums text-black dark:text-slate-200">
-              {value} cm
-            </span>
-          </div>
-        ))}
+                key={name}
+                className="flex items-center gap-2 rounded-md bg-gray-50/80 px-3 py-2 dark:bg-slate-700/50"
+              >
+                <span className="min-w-[4.5rem] shrink-0 text-xs font-medium text-slate-600 dark:text-slate-400">
+                  {name}
+                </span>
+                <div className="relative h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-slate-600">
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full bg-[#007780]"
+                    style={{ width: `${Math.min((value / MAX_CM) * 100, 100)}%` }}
+                  />
+                </div>
+                <span className="w-12 shrink-0 text-right text-xs font-semibold tabular-nums text-black dark:text-slate-200">
+                  {value} cm
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleCopyRow(name, value)}
+                  aria-label={t("result.copy")}
+                  className="group flex shrink-0 items-center gap-1 text-xs font-bold text-[#007780] transition-colors hover:text-[#006269] dark:hover:text-[#0099a3]"
+                >
+                  <MaterialIcon name="content_copy" className="text-sm" />
+                  <span className="hidden sm:inline">{isCopied ? t("result.copied") : t("result.copy")}</span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
+      <div
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-5 rounded-b-md bg-gradient-to-t from-white to-transparent dark:from-slate-800"
+        aria-hidden
+      />
     </div>
   );
 }

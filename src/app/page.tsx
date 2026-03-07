@@ -69,6 +69,15 @@ export default function Home() {
     return !title && !desc;
   }, []);
 
+  const handleResultChange = useCallback((updates: Partial<ListingResult>) => {
+    setResult((prev) => {
+      if (!prev) return null;
+      const next = { ...prev, ...updates };
+      saveLastResult(next, lastRequestRef.current ?? undefined);
+      return next;
+    });
+  }, []);
+
   const handleResult = useCallback(
     (newResult: ListingResult, request?: AnalyzeRequest) => {
       if (isEmptyResult(newResult)) {
@@ -257,7 +266,7 @@ export default function Home() {
                         isGeneratingResult ? "pointer-events-none select-none blur-sm" : ""
                       }`}
                     >
-                      <ResultCard data={result} />
+                      <ResultCard data={result} onChange={handleResultChange} />
                     </div>
                     {isGeneratingResult && (
                       <div
