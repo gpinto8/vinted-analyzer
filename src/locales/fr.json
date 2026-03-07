@@ -1,7 +1,7 @@
 {
   "header": {
     "howItWorks": "Comment ça marche",
-    "signIn": "Se connecter",
+    "shareFeedback": "Partager un avis",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
     "scrollToTop": "Haut de page",
@@ -101,15 +101,15 @@
   },
   "howItWorks": {
     "title": "Comment ça marche",
-    "subtitle": "Obtenez des annonces Vinted optimisées en quelques étapes.",
+    "subtitle": "Annonces Vinted optimisées SEO avec l'IA. Prix suggérés, retail vérifié si disponible, score de vendabilité.",
     "step1Title": "Téléchargez des photos",
-    "step1Text": "Ajoutez jusqu'à 20 photos de votre article. Notre IA les analyse pour détecter le style, la marque et les détails.",
+    "step1Text": "Ajoutez jusqu'à 20 photos. L'IA détecte marque, style, taille, couleur et détails.",
     "step2Title": "Indiquez l'état et les détails",
-    "step2Text": "Choisissez l'état de l'article et ajoutez éventuellement le type de produit ou la marque pour améliorer le résultat.",
-    "step3Title": "Générez l'annonce",
-    "step3Text": "Cliquez sur Générer l'annonce. L'IA crée un titre, une description, un prix suggéré et des tags pour Vinted.",
+    "step2Text": "Sélectionnez l'état et éventuellement le type de produit ou la marque.",
+    "step3Title": "Générez et consultez",
+    "step3Text": "L'IA crée titre, description, prix suggéré et mensurations. Si nous trouvons des données retail vérifiées, nous les affichons avec un lien. Le score de vendabilité indique la probabilité de vente.",
     "step4Title": "Copiez et publiez",
-    "step4Text": "Copiez le titre et la description suggérés, puis collez-les dans l'application Vinted pour publier votre article.",
+    "step4Text": "Copiez et collez dans l'app Vinted.",
     "gotIt": "Compris",
     "close": "Fermer"
   },
@@ -124,6 +124,7 @@
   "footer": {
     "loveShopping": "Vous aimez faire du shopping ?",
     "showLove": "Jetez un œil à mon Vinted",
+    "donate": "Faire un don",
     "copyright": "Vinted Analyzer. Non affilié à Vinted Ltd."
   },
   "nav": {
@@ -134,5 +135,38 @@
     "comingSoon": "Bientôt disponible",
     "comingSoonText": "Cette fonctionnalité est en cours de développement. Revenez bientôt !",
     "ok": "OK"
+  },
+  "feedback": {
+    "title": "Partager un avis",
+    "subtitle": "Dites-nous quelles fonctionnalités vous aimeriez. Tous les champs sont facultatifs.",
+    "nameOptional": "Nom (facultatif)",
+    "emailOptional": "Email (facultatif)",
+    "featuresLabel": "Fonctionnalités souhaitées",
+    "featureLogin": "Login / Compte",
+    "featurePostToVinted": "Publier directement sur Vinted depuis l'app",
+    "featureDashboard": "Dashboard pour gérer annonces et ventes",
+    "featurePriceHistory": "Historique des prix / insights marché",
+    "featureBulkListing": "Annonces en lot",
+    "featureAnalytics": "Analytics",
+    "customIdeasLabel": "Autres idées ?",
+    "customIdeasPlaceholder": "Vos idées…",
+    "sendButton": "Envoyer",
+    "sending": "Envoi…",
+    "success": "Merci ! Votre avis a bien été envoyé.",
+    "error": "Oups, on a eu un petit souci. Réessayez ?"
+  },
+  "donation": {
+    "title": "Soutenir le projet",
+    "subtitle": "Aidez à garder Vinted Analyzer gratuit. Chaque don compte.",
+    "selectAmount": "Choisir le montant",
+    "custom": "Personnalisé",
+    "customAmount": "Montant personnalisé",
+    "customPlaceholder": "0.00",
+    "minAmount": "Minimum €{min}",
+    "cta": "Donner €{amount}",
+    "processing": "Redirection…",
+    "success": "Merci pour votre don !",
+    "canceled": "Don annulé.",
+    "error": "Quelque chose a coincé. Réessayez dans un instant ?"
   }
 }

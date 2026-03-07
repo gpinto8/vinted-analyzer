@@ -7,8 +7,9 @@ import { ListingForm, type AnalyzeRequest } from "@/components/ListingForm";
 import { EmptyResult } from "@/components/EmptyResult";
 import { ResultCard } from "@/components/ResultCard";
 import { FeatureCards } from "@/components/FeatureCards";
-import { ComingSoonModal } from "@/components/ComingSoonModal";
+import { FeedbackModal } from "@/components/FeedbackModal";
 import { HowItWorksModal } from "@/components/HowItWorksModal";
+import { DonationModal } from "@/components/DonationModal";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import { PageSkeleton } from "@/components/PageSkeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -23,15 +24,18 @@ export default function Home() {
   const [draftProductType, setDraftProductType] = useState("");
   const [draftBrand, setDraftBrand] = useState("");
   const [formFiles, setFormFiles] = useState<File[]>([]);
-  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [showDonation, setShowDonation] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [isUpdatingResultLocale, setIsUpdatingResultLocale] = useState(false);
   const [isGeneratingResult, setIsGeneratingResult] = useState(false);
   const [notClothingToast, setNotClothingToast] = useState(false);
   const [analyzeErrorToast, setAnalyzeErrorToast] = useState(false);
+  const [donationToast, setDonationToast] = useState<"success" | "canceled" | false>(false);
   const lastRequestRef = useRef<AnalyzeRequest | null>(null);
   const notClothingToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const analyzeErrorToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const donationToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const TOAST_DURATION_MS = 6000;
 
@@ -62,6 +66,41 @@ export default function Home() {
       analyzeErrorToastTimerRef.current = null;
     }
   }, []);
+
+  const startDonationToastTimer = useCallback(() => {
+    donationToastTimerRef.current = setTimeout(() => {
+      setDonationToast(false);
+      donationToastTimerRef.current = null;
+    }, TOAST_DURATION_MS);
+  }, []);
+
+  const pauseDonationToastTimer = useCallback(() => {
+    if (donationToastTimerRef.current != null) {
+      clearTimeout(donationToastTimerRef.current);
+      donationToastTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const donation = params.get("donation");
+    if (donation === "success" || donation === "canceled") {
+      setDonationToast(donation);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!donationToast) return;
+    startDonationToastTimer();
+    return () => {
+      if (donationToastTimerRef.current != null) {
+        clearTimeout(donationToastTimerRef.current);
+        donationToastTimerRef.current = null;
+      }
+    };
+  }, [donationToast, startDonationToastTimer]);
 
   const isEmptyResult = useCallback((r: ListingResult) => {
     const title = (r.title ?? "").trim();
@@ -204,7 +243,7 @@ export default function Home() {
     return (
       <div className="flex min-h-screen flex-col bg-background-light dark:bg-background-dark">
         <Header
-          onSignInClick={() => setShowComingSoon(true)}
+          onFeedbackClick={() => setShowFeedback(true)}
           onHowItWorksClick={() => setShowHowItWorks(true)}
         />
         <PageSkeleton />
@@ -215,7 +254,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-background-light dark:bg-background-dark">
       <Header
-        onSignInClick={() => setShowComingSoon(true)}
+        onFeedbackClick={() => setShowFeedback(true)}
         onHowItWorksClick={() => setShowHowItWorks(true)}
       />
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 pb-10 sm:px-6 lg:px-8">
@@ -319,23 +358,33 @@ export default function Home() {
         </section>
 
         <footer className="mt-auto border-t border-gray-300 pt-4 pb-0 text-center dark:border-slate-700">
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            {t("footer.loveShopping")}{" "}
-            <a
-              href="https://www.vinted.it/member/286326599"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#007780] underline-offset-2 hover:underline dark:text-primary"
+          <div className="mb-3 flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-2">
+            <button
+              type="button"
+              onClick={() => setShowDonation(true)}
+              className="order-1 mb-1 min-w-[6rem] shrink-0 rounded-lg bg-[#007780] px-5 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#006269] sm:order-2 sm:min-w-0 sm:w-fit"
             >
-              {t("footer.showLove")}
-            </a>
-          </p>
+              {t("footer.donate")}
+            </button>
+            <p className="order-2 text-xs text-slate-400 dark:text-slate-500 sm:order-1">
+              {t("footer.loveShopping")}{" "}
+              <a
+                href="https://www.vinted.it/member/286326599"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#007780] underline-offset-2 hover:underline dark:text-primary"
+              >
+                {t("footer.showLove")}
+              </a>
+            </p>
+          </div>
           <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">
             © {new Date().getFullYear()} {t("footer.copyright")}
           </p>
         </footer>
       </main>
-      <ComingSoonModal isOpen={showComingSoon} onClose={() => setShowComingSoon(false)} />
+      <FeedbackModal isOpen={showFeedback} onClose={() => setShowFeedback(false)} />
+      <DonationModal isOpen={showDonation} onClose={() => setShowDonation(false)} />
       <HowItWorksModal isOpen={showHowItWorks} onClose={() => setShowHowItWorks(false)} />
       {notClothingToast &&
         typeof document !== "undefined" &&
@@ -382,6 +431,39 @@ export default function Home() {
               onClick={() => setAnalyzeErrorToast(false)}
               className="shrink-0 rounded-lg p-1.5 text-red-700 transition-colors hover:bg-red-200/80 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-400 dark:text-red-300 dark:hover:bg-red-800/50 dark:hover:text-red-100"
               aria-label="Close"
+            >
+              <MaterialIcon name="close" className="text-lg" />
+            </button>
+          </div>,
+          document.body
+        )}
+      {donationToast &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            role="status"
+            aria-live="polite"
+            onMouseEnter={pauseDonationToastTimer}
+            onMouseLeave={startDonationToastTimer}
+            className={`fixed right-4 top-[4.5rem] z-[100] flex max-w-lg items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium shadow-lg lg:right-4 lg:top-auto lg:bottom-4 ${
+              donationToast === "success"
+                ? "border border-emerald-400 bg-emerald-50 text-emerald-900 dark:border-emerald-600 dark:bg-emerald-950/90 dark:text-emerald-100"
+                : "border border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+            }`}
+          >
+            {donationToast === "success" ? (
+              <MaterialIcon name="check_circle" className="text-xl text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <MaterialIcon name="info" className="text-xl text-slate-500 dark:text-slate-400" />
+            )}
+            <span className="min-w-0 flex-1">
+              {donationToast === "success" ? t("donation.success") : t("donation.canceled")}
+            </span>
+            <button
+              type="button"
+              onClick={() => setDonationToast(false)}
+              className="shrink-0 rounded p-0.5 transition-colors hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-[#007780]"
+              aria-label={t("howItWorks.close")}
             >
               <MaterialIcon name="close" className="text-lg" />
             </button>

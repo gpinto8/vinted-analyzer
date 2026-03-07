@@ -32,7 +32,7 @@ function useTheme() {
 }
 
 interface HeaderProps {
-  onSignInClick?: () => void;
+  onFeedbackClick?: () => void;
   onHowItWorksClick?: () => void;
 }
 
@@ -43,7 +43,7 @@ const LOCALES: { value: Locale; labelKey: string }[] = [
   { value: "fr", labelKey: "languages.fr" },
 ];
 
-export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
+export function Header({ onFeedbackClick, onHowItWorksClick }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [langDropdownPosition, setLangDropdownPosition] = useState({ top: 0, left: 0 });
@@ -79,8 +79,8 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
     setMenuOpen(false);
   }
 
-  function handleSignIn() {
-    onSignInClick?.();
+  function handleFeedback() {
+    onFeedbackClick?.();
     setMenuOpen(false);
   }
 
@@ -157,6 +157,7 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
                         onClick={() => {
                           setLocale(loc.value);
                           setLangOpen(false);
+                          setMenuOpen(false);
                         }}
                         className={`w-full px-4 py-2 text-left text-sm transition-colors focus:outline-none focus:ring-0 ${
                           locale === loc.value
@@ -179,10 +180,10 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
           ) : (
             <button
               type="button"
-              onClick={onSignInClick}
+              onClick={onFeedbackClick}
               className="rounded-lg bg-[#007780] px-4 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#006269]"
             >
-              {t("header.signIn")}
+              {t("header.shareFeedback")}
             </button>
           )}
         </nav>
@@ -230,10 +231,10 @@ export function Header({ onSignInClick, onHowItWorksClick }: HeaderProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={handleSignIn}
+                    onClick={handleFeedback}
                     className="w-fit rounded-lg border-0 bg-[#007780] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#006269] focus:outline-none focus:ring-0"
                   >
-                    {t("header.signIn")}
+                    {t("header.shareFeedback")}
                   </button>
                 </>
               )}

@@ -1,7 +1,7 @@
 {
   "header": {
     "howItWorks": "How it works",
-    "signIn": "Sign In",
+    "shareFeedback": "Share feedback",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "scrollToTop": "Scroll to top",
@@ -101,15 +101,15 @@
   },
   "howItWorks": {
     "title": "How it works",
-    "subtitle": "Get optimized Vinted listings in a few steps.",
+    "subtitle": "SEO-optimized Vinted listings with AI. Suggested prices, verified retail when available, sellability score.",
     "step1Title": "Upload photos",
-    "step1Text": "Add up to 20 photos of your item. Our AI analyzes them to detect style, brand, and details.",
+    "step1Text": "Add up to 20 photos. AI detects brand, style, size, color, and details.",
     "step2Title": "Set condition & details",
-    "step2Text": "Choose the item condition and optionally add product type or brand to improve the result.",
-    "step3Title": "Generate listing",
-    "step3Text": "Click Generate Listing. AI creates a title, description, suggested price, and tags for Vinted.",
+    "step2Text": "Select condition and optionally add product type or brand.",
+    "step3Title": "Generate & review",
+    "step3Text": "AI creates title, description, suggested price, and measurements. When we find verified retail data, we show it with a link. Sellability score shows how likely it is to sell.",
     "step4Title": "Copy & publish",
-    "step4Text": "Copy the suggested title and description, then paste them into the Vinted app to list your item.",
+    "step4Text": "Copy and paste into the Vinted app.",
     "gotIt": "Got it",
     "close": "Close"
   },
@@ -124,6 +124,7 @@
   "footer": {
     "loveShopping": "Love shopping?",
     "showLove": "Check out my Vinted",
+    "donate": "Donate",
     "copyright": "Vinted Analyzer. Not affiliated with Vinted Ltd."
   },
   "nav": {
@@ -134,5 +135,38 @@
     "comingSoon": "Coming soon",
     "comingSoonText": "This feature is under development. Check back later!",
     "ok": "OK"
+  },
+  "feedback": {
+    "title": "Share feedback",
+    "subtitle": "Tell us which features you'd like to see. All fields are optional.",
+    "nameOptional": "Name (optional)",
+    "emailOptional": "Email (optional)",
+    "featuresLabel": "Features I'd like",
+    "featureLogin": "Login / Account",
+    "featurePostToVinted": "Post directly to Vinted from the app",
+    "featureDashboard": "Dashboard to manage listings/sales",
+    "featurePriceHistory": "Price history / market insights",
+    "featureBulkListing": "Bulk listing",
+    "featureAnalytics": "Analytics",
+    "customIdeasLabel": "Other features or ideas?",
+    "customIdeasPlaceholder": "Your ideas…",
+    "sendButton": "Send feedback",
+    "sending": "Sending…",
+    "success": "Thanks! Your feedback has been sent.",
+    "error": "Could not send. Try again."
+  },
+  "donation": {
+    "title": "Support the project",
+    "subtitle": "Help keep Vinted Analyzer free. Every donation counts.",
+    "selectAmount": "Choose amount",
+    "custom": "Custom",
+    "customAmount": "Custom amount",
+    "customPlaceholder": "0.00",
+    "minAmount": "Minimum €{min}",
+    "cta": "Donate €{amount}",
+    "processing": "Redirecting…",
+    "success": "Thank you for your donation!",
+    "canceled": "Donation canceled.",
+    "error": "Something went wrong. Try again in a moment?"
   }
 }
